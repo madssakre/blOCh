@@ -1,0 +1,26 @@
+﻿Provider: John Wiley & Sons, Ltd
+Content:text/plain; charset="UTF-8"
+
+TY  - JOUR
+A1  - Vinding, Mads S.
+A1  - Guérin, Bastien
+A1  - Vosegaard, Thomas
+A1  - Nielsen, Niels Chr.
+T1  - Local SAR, global SAR, and power-constrained large-flip-angle pulses with optimal control and virtual observation points
+JF  - Magnetic Resonance in Medicine
+JA  - Magn. Reson. Med.
+VL  - 77
+IS  - 1
+SN  - 1522-2594
+UR  - http://dx.doi.org/10.1002/mrm.26086
+DO  - 10.1002/mrm.26086
+SP  - 374
+EP  - 384
+KW  - virtual observation points
+KW  - local SAR
+KW  - optimal control
+KW  - multidimensional spatial-selective excitation
+KW  - hard constraints
+PY  - 2017
+Y1  - 2017/01/01
+ER  - 

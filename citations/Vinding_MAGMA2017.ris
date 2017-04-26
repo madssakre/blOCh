@@ -1,0 +1,23 @@
+TY  - JOUR
+AU  - Vinding, Mads S.
+AU  - Brenner, Daniel
+AU  - Tse, Desmond H. Y.
+AU  - Vellmer, Sebastian
+AU  - Vosegaard, Thomas
+AU  - Suter, Dieter
+AU  - Stöcker, Tony
+AU  - Maximov, Ivan I.
+PY  - 2017
+DA  - 2017//
+TI  - Application of the limited-memory quasi-Newton algorithm for multi-dimensional, large flip-angle RF pulses at 7T
+JO  - Magnetic Resonance Materials in Physics, Biology and Medicine
+SP  - 29
+EP  - 39
+VL  - 30
+IS  - 1
+AB  - Ultrahigh field MRI provides great opportunities for medical diagnostics and research. However, ultrahigh field MRI also brings challenges, such as larger magnetic susceptibility induced field changes. Parallel-transmit radio-frequency pulses can ameliorate these complications while performing advanced tasks in routine applications. To address one class of such pulses, we propose an optimal-control algorithm as a tool for designing advanced multi-dimensional, large flip-angle, radio-frequency pulses. We contrast initial conditions, constraints, and field correction abilities against increasing pulse trajectory acceleration factors.
+SN  - 1352-8661
+UR  - http://dx.doi.org/10.1007/s10334-016-0580-1
+DO  - 10.1007/s10334-016-0580-1
+ID  - Vinding2017
+ER  - 
