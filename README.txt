@@ -1,6 +1,8 @@
-README for blOCh 
+                                       blOCh 
+                                       
+                                    Version 5.0
 
-2017 April 26
+                                   2017 April 26
 
 
 1.0 CONTENTS
@@ -26,6 +28,10 @@ README for blOCh
 	Best wishes
 	
 	Mads Vinding
+
+
+
+
 
 
 3.0 CITATION
@@ -63,8 +69,13 @@ doi: 10.1063/1.4739755
 	Please see the license file, LICENSE.txt
 	
 	
+5.0 CONTRIBUTORS
+
+	Besides myself blOCh receives invaluable support development from
 	
-	
+	Dr. Ivan I. Maximov
+	MSc. David Goodwin
+		
 
 
 
