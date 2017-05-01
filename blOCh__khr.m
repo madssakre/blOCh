@@ -832,7 +832,7 @@ switch khr.Traj
                 khr.s = zeros(3,khr.N);
                 khr.s(1,:) = s;
             case '1DAP'
-                [k,g,s,khr.t,khr.m,khr.N] = Traj_1Dsl(Par.TBW,Par.T,khr.gamma,spc.TH(2),khr.dt);
+                [k,g,s,khr.t,khr.m,khr.N] = Traj_1Dsl(khr.Par.TBW,Par.T,khr.gamma,spc.TH(2),khr.dt);
                 khr.k = zeros(3,khr.N);
                 khr.k(2,:) = k;
                 khr.g = zeros(3,khr.N);
@@ -840,7 +840,7 @@ switch khr.Traj
                 khr.s = zeros(3,khr.N);
                 khr.s(2,:) = s;
             case '1DSI'
-                [k,g,s,khr.t,khr.m,khr.N] = Traj_1Dsl(Par.TBW,Par.T,khr.gamma,spc.TH(3),khr.dt);
+                [k,g,s,khr.t,khr.m,khr.N] = Traj_1Dsl(khr.Par.TBW,Par.T,khr.gamma,spc.TH(3),khr.dt);
                 khr.k = zeros(3,khr.N);
                 khr.k(3,:) = k;
                 khr.g = zeros(3,khr.N);
@@ -866,7 +866,7 @@ switch khr.Traj
                 khr.s = zeros(3,khr.N);
                 khr.s(1,:) = s;
             case '1DAP'
-                [k,g,s,khr.t,khr.m,khr.N] = Traj_1Dslref(Par.TBW,Par.T,khr.gamma,spc.TH(2),khr.dt);
+                [k,g,s,khr.t,khr.m,khr.N] = Traj_1Dslref(khr.Par.TBW,Par.T,khr.gamma,spc.TH(2),khr.dt);
                 khr.k = zeros(3,khr.N);
                 khr.k(2,:) = k;
                 khr.g = zeros(3,khr.N);
@@ -874,7 +874,7 @@ switch khr.Traj
                 khr.s = zeros(3,khr.N);
                 khr.s(2,:) = s;
             case '1DSI'
-                [k,g,s,khr.t,khr.m,khr.N] = Traj_1Dslref(Par.TBW,Par.T,khr.gamma,spc.TH(3),khr.dt);
+                [k,g,s,khr.t,khr.m,khr.N] = Traj_1Dslref(khr.Par.TBW,Par.T,khr.gamma,spc.TH(3),khr.dt);
                 khr.k = zeros(3,khr.N);
                 khr.k(3,:) = k;
                 khr.g = zeros(3,khr.N);
