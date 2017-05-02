@@ -185,6 +185,7 @@ if isempty(Fun)
                 
                 sim.OptNum = 2;
             end
+            sim.Kact = Kact;
             sim.dt = opt.dt;
             sim.gamma = khr.gamma;
             Nact = opt.N;
@@ -219,6 +220,7 @@ if isempty(Fun)
             sim.gamma = khr.gamma;
             Nact = size(sim.uo,2);
             Kact = size(sim.uo,3);
+            sim.Kact = Kact;
             sim.MaxIter = Kact-1;
             sim.N = Nact;
             sim.OptNum = 1;
@@ -968,14 +970,16 @@ if hsim.sim.K > 1
     set(hsim.slider_k,'Max',hsim.sim.K)
     IterationSliderStep = [1, 1] / (hsim.sim.K - 1);
     set(hsim.slider_k,'SliderStep',IterationSliderStep)
-    hsim.kNo = hsim.sim.K;
-    set(hsim.slider_k,'Visible','on','Value',hsim.kNo)
+    hsim.kmNo = hsim.sim.K;
+    hsim.kpNo = hsim.sim.Kact;
+    set(hsim.slider_k,'Visible','on','Value',hsim.kmNo)
     
-    set(hsim.text_k,'Visible','on','String',sprintf('Iteration %i of %i',hsim.kNo-1,hsim.sim.K-1))
+    set(hsim.text_k,'Visible','on','String',sprintf('Iteration %i of %i',hsim.kmNo-1,hsim.sim.Kact-1))
 else
     set(hsim.slider_k,'Visible','off','Value',1)
     set(hsim.text_k,'Visible','off');
-    hsim.kNo = 1;
+    hsim.kmNo = 1;
+    hsim.kpNo = hsim.sim.Kact;
 end
 %%
 
@@ -1017,18 +1021,18 @@ set(hsim.listbox1,'String',List1);
 
 %%
 
-    String = cell(1,9);
-    String{1} = 'Magnetization, |Mxy| [M0]';
-    String{2} = 'Magnetization, arg(Mxy) [rad]';
-    
-    String{3} = 'Magnetization, Mx [M0]';
-    String{4} = 'Magnetization, My [M0]';
-    String{5} = 'Magnetization, Mz [M0]';
-    
-    String{6} = 'Desired Magnetization, |Mxy| [M0]';
-    String{7} = 'Desired Magnetization, Mx [M0]';
-    String{8} = 'Desired Magnetization, My [M0]';
-    String{9} = 'Desired Magnetization, Mz [M0]';
+String = cell(1,9);
+String{1} = 'Magnetization, |Mxy| [M0]';
+String{2} = 'Magnetization, arg(Mxy) [rad]';
+
+String{3} = 'Magnetization, Mx [M0]';
+String{4} = 'Magnetization, My [M0]';
+String{5} = 'Magnetization, Mz [M0]';
+
+String{6} = 'Desired Magnetization, |Mxy| [M0]';
+String{7} = 'Desired Magnetization, Mx [M0]';
+String{8} = 'Desired Magnetization, My [M0]';
+String{9} = 'Desired Magnetization, Mz [M0]';
 
 set(hsim.popupmenu_Magn, 'String', String);
 set(hsim.popupmenu_Magn, 'Value',1);
@@ -1122,9 +1126,36 @@ end
 
 function slider_k_Callback(hOb, ed)
 global hsim
-hsim.kNo = round(get(hOb, 'Value'));
-set(hOb, 'Value',hsim.kNo);
-set(hsim.text_k,'Visible','on','String',sprintf('Iteration %i of %i',hsim.kNo-1,hsim.sim.K-1))
+
+switch hsim.sim.sim_k
+    
+    case 'last'
+        hsim.kmNo = hsim.sim.k;
+        hsim.kpNo = hsim.sim.k;
+        set(hOb, 'Value',hsim.kmNo);
+    case 'all'
+        hsim.kmNo = round(get(hOb, 'Value'));
+        hsim.kpNo = hsim.kmNo;
+        set(hOb, 'Value',hsim.kmNo);
+        set(hsim.text_k,'Visible','on','String',sprintf('Iteration %i of %i',hsim.kmNo-1,hsim.sim.Kact-1))
+    case 'firstlast'
+        if round(get(hOb, 'Value')) == 1
+            hsim.kmNo = 1;
+            hsim.kpNo = 1;
+        elseif round(get(hOb, 'Value')) == 2
+            hsim.kmNo = 2;
+            hsim.kpNo = hsim.sim.Kact;
+            
+        end
+        
+        set(hOb, 'Value',hsim.kmNo);
+        set(hsim.text_k,'Visible','on','String',sprintf('Iteration %i of %i',hsim.kpNo-1,hsim.sim.Kact-1))
+        
+end
+
+
+
+
 hsim = Plotting(hsim);
 end
 
@@ -1341,7 +1372,7 @@ end
 
 function hsim = what2plot(hsim)
 % tic
-M_t = blOCh__spc('list2grid',[],[],[],[],hsim.sim.M_t(:,hsim.nNo,hsim.kNo,hsim.pTxNo,hsim.nB1inh,hsim.nB0inh),[hsim.sim.R,hsim.sim.Rv],hsim.sim.idxtot,3);
+M_t = blOCh__spc('list2grid',[],[],[],[],hsim.sim.M_t(:,hsim.nNo,hsim.kmNo,hsim.pTxNo,hsim.nB1inh,hsim.nB0inh),[hsim.sim.R,hsim.sim.Rv],hsim.sim.idxtot,3);
 Md = blOCh__spc('list2grid',[],[],[],[],hsim.sim.Md,[hsim.sim.R,hsim.sim.Rv],hsim.sim.idxtot,3);
 Mx_max = max(max(hsim.sim.M_t(1:3:end,:)));
 Mx_min = min(min(hsim.sim.M_t(1:3:end,:)));
@@ -1415,7 +1446,7 @@ switch get(hsim.popupmenu_Magn,'Value')
     case 8
         %       'Desired Magnetization, My [M0]';
         ordinate = Md(:,:,:,:,2);
-       hsim.axm.ordinate_mn = Mdy_min;
+        hsim.axm.ordinate_mn = Mdy_min;
         hsim.axm.ordinate_mx = Mdy_max;
     case 9
         %       'Desired Magnetization, Mz [M0]';
@@ -1548,7 +1579,7 @@ switch hsim.sim.Dim
         hsim.axm.ordinate = squeeze(ordinate);
 end
 switch get(hsim.popupmenu_Pulse,'Value')
-
+    
     case 1
         if hsim.pTxNo == hsim.sim.pTx+1
             temp = winter(hsim.sim.pTx);
@@ -1558,10 +1589,10 @@ switch get(hsim.popupmenu_Pulse,'Value')
             hsim.axp.colorpulse = temp(hsim.pTxNo,:);
         end
         if hsim.pTxNo == hsim.sim.pTx+1
-            hsim.axp.ordinate = abs(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo))).';
+            hsim.axp.ordinate = abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
             
         else
-            hsim.axp.ordinate = abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo))).';
+            hsim.axp.ordinate = abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
             
         end
         Mx = max(hsim.axp.ordinate(:))+eps;
@@ -1581,9 +1612,9 @@ switch get(hsim.popupmenu_Pulse,'Value')
             hsim.axp.colorpulse = temp(hsim.pTxNo,:);
         end
         if hsim.pTxNo == hsim.sim.pTx+1
-            hsim.axp.ordinate = angle(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo))).';
+            hsim.axp.ordinate = angle(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
         else
-            hsim.axp.ordinate = angle(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo))).';
+            hsim.axp.ordinate = angle(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
         end
         
         hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
@@ -1603,9 +1634,9 @@ switch get(hsim.popupmenu_Pulse,'Value')
             hsim.axp.colorpulse = temp(hsim.pTxNo,:);
         end
         if hsim.pTxNo == hsim.sim.pTx+1
-            hsim.axp.ordinate = real(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo))).';
+            hsim.axp.ordinate = real(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
         else
-            hsim.axp.ordinate = real(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo))).';
+            hsim.axp.ordinate = real(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
         end
         Mn = min(hsim.axp.ordinate(:))-eps;
         Mx = max(hsim.axp.ordinate(:))+eps;
@@ -1626,9 +1657,9 @@ switch get(hsim.popupmenu_Pulse,'Value')
             hsim.axp.colorpulse = temp(hsim.pTxNo,:);
         end
         if hsim.pTxNo == hsim.sim.pTx+1
-            hsim.axp.ordinate = imag(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo))).';
+            hsim.axp.ordinate = imag(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
         else
-            hsim.axp.ordinate = imag(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo))).';
+            hsim.axp.ordinate = imag(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.pmNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
         end
         Mn = min(hsim.axp.ordinate(:))-eps;
         Mx = max(hsim.axp.ordinate(:))+eps;
@@ -1683,8 +1714,8 @@ switch get(hsim.popupmenu_Pulse,'Value')
         temp(:,2) = temp(:,2)+2.2;
         temp(:,1) = temp(:,1)+4.2;
         hsim.axp.ordinate = temp;
-%         Mn = min(hsim.axp.ordinate(:))-eps;
-%         Mx = max(hsim.axp.ordinate(:))+eps;
+        %         Mn = min(hsim.axp.ordinate(:))-eps;
+        %         Mx = max(hsim.axp.ordinate(:))+eps;
         hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
         hsim.axp.Dim2ticklabel = {'G_z','G_y','G_x'};
         hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
@@ -1696,16 +1727,16 @@ switch get(hsim.popupmenu_Pulse,'Value')
             temp = winter(hsim.sim.pTx);
         else
             temp = winter(hsim.sim.pTx);
-           temp=  temp(hsim.pTxNo,:);
+            temp=  temp(hsim.pTxNo,:);
         end
         temp2 = [0,0,0;0.2,0.2,0.2;0.4,0.4,0.4];
         hsim.axp.colorpulse = [temp2;temp];
         
         if hsim.pTxNo == hsim.sim.pTx+1
-            temprf = [abs(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo))).'./max(max(abs(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo)))))];
+            temprf = [abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).'./max(max(abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo)))))];
             
         else
-            temprf = [abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo))).'./max(max(abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo)))))];
+            temprf = [abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).'./max(max(abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo)))))];
             
         end
         
@@ -1724,7 +1755,7 @@ switch get(hsim.popupmenu_Pulse,'Value')
         hsim.axp.Dim1label = ' Time frame [#]';
         
         
-   case 10
+    case 10
         temp = [0,0,0;0.2,0.2,0.2;0.4,0.4,0.4];
         hsim.axp.colorpulse = temp(1,:);
         hsim.axp.ordinate = cumsum(hsim.sim.g(1,:).').*hsim.sim.dt*hsim.sim.gamma/2/pi - sum(hsim.sim.g(1,:).').*hsim.sim.dt*hsim.sim.gamma/2/pi;
@@ -1770,7 +1801,7 @@ switch get(hsim.popupmenu_Pulse,'Value')
         temp = [0,0,0;0.2,0.2,0.2;0.4,0.4,0.4];
         
         hsim.axp.colorpulse = temp;
-%         temp = [hsim.sim.g(1,:).',hsim.sim.g(2,:).',hsim.sim.g(3,:).']./max(abs(hsim.sim.g(:)));
+        %         temp = [hsim.sim.g(1,:).',hsim.sim.g(2,:).',hsim.sim.g(3,:).']./max(abs(hsim.sim.g(:)));
         temp = cumsum([hsim.sim.g(1,:).',hsim.sim.g(2,:).',hsim.sim.g(3,:).']);
         temp = temp./max(abs(temp(:)));
         temp(:,2) = temp(:,2)+2.2;
@@ -1789,16 +1820,16 @@ switch get(hsim.popupmenu_Pulse,'Value')
             temp = winter(hsim.sim.pTx);
         else
             temp = winter(hsim.sim.pTx);
-           temp=  temp(hsim.pTxNo,:);
+            temp=  temp(hsim.pTxNo,:);
         end
         temp2 = [0,0,0;0.2,0.2,0.2;0.4,0.4,0.4];
         hsim.axp.colorpulse = [temp2;temp];
         
         if hsim.pTxNo == hsim.sim.pTx+1
-            temprf = [abs(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo))).'./max(max(abs(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo)))))];
+            temprf = [abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).'./max(max(abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo)))))];
             
         else
-            temprf = [abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo))).'./max(max(abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo)))))];
+            temprf = [abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).'./max(max(abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo)))))];
             
         end
         
@@ -1826,34 +1857,34 @@ function hsim=Plotting(hsim)
 hsim = what2plot(hsim);
 
 
+
+switch hsim.sim.Dim
+    case '1DSI'
+        axes(hsim.axes_Magn)
         
-        switch hsim.sim.Dim
-            case '1DSI'
-                axes(hsim.axes_Magn)
-                
-                plot(hsim.axm.ordinate,'linewidth',2)
-                axis([1,hsim.sim.R(3),hsim.axm.ordinate_mn,hsim.axm.ordinate_mx])
-                set(hsim.axes_Magn,'YTick',linspace(hsim.axm.ordinate_mn,hsim.axm.ordinate_mx,5))
-                set(hsim.axes_Magn,'XTickLabel',hsim.axm.Dim1ticklabel)
-                xlabel(hsim.axm.Dim1label)
-            case '1DAP'
-                axes(hsim.axes_Magn)
-                
-                plot(hsim.axm.ordinate,'linewidth',2)
-                axis([1,hsim.sim.R(2),hsim.axm.ordinate_mn,hsim.axm.ordinate_mx])
-                set(hsim.axes_Magn,'YTick',linspace(hsim.axm.ordinate_mn,hsim.axm.ordinate_mx,5))
-                set(hsim.axes_Magn,'XTickLabel',hsim.axm.Dim1ticklabel)
-                xlabel(hsim.axm.Dim1label)
-                
-            case '1DRL'
-                axes(hsim.axes_Magn)
-                
-                plot(hsim.axm.ordinate,'linewidth',2)
-                axis([1,hsim.sim.R(1),hsim.axm.ordinate_mn,hsim.axm.ordinate_mx])
-                set(hsim.axes_Magn,'YTick',linspace(hsim.axm.ordinate_mn,hsim.axm.ordinate_mx,5))
-                set(hsim.axes_Magn,'XTickLabel',hsim.axm.Dim1ticklabel)
-                xlabel(hsim.axm.Dim1label)
-                
+        plot(hsim.axm.ordinate,'linewidth',2)
+        axis([1,hsim.sim.R(3),hsim.axm.ordinate_mn,hsim.axm.ordinate_mx])
+        set(hsim.axes_Magn,'YTick',linspace(hsim.axm.ordinate_mn,hsim.axm.ordinate_mx,5))
+        set(hsim.axes_Magn,'XTickLabel',hsim.axm.Dim1ticklabel)
+        xlabel(hsim.axm.Dim1label)
+    case '1DAP'
+        axes(hsim.axes_Magn)
+        
+        plot(hsim.axm.ordinate,'linewidth',2)
+        axis([1,hsim.sim.R(2),hsim.axm.ordinate_mn,hsim.axm.ordinate_mx])
+        set(hsim.axes_Magn,'YTick',linspace(hsim.axm.ordinate_mn,hsim.axm.ordinate_mx,5))
+        set(hsim.axes_Magn,'XTickLabel',hsim.axm.Dim1ticklabel)
+        xlabel(hsim.axm.Dim1label)
+        
+    case '1DRL'
+        axes(hsim.axes_Magn)
+        
+        plot(hsim.axm.ordinate,'linewidth',2)
+        axis([1,hsim.sim.R(1),hsim.axm.ordinate_mn,hsim.axm.ordinate_mx])
+        set(hsim.axes_Magn,'YTick',linspace(hsim.axm.ordinate_mn,hsim.axm.ordinate_mx,5))
+        set(hsim.axes_Magn,'XTickLabel',hsim.axm.Dim1ticklabel)
+        xlabel(hsim.axm.Dim1label)
+        
         
     case {'1+1DSI','1+1DRL','1+1DAP','2DAx','2DCo','2DSa','2+1DAx','2+1DCo','2+1DSa','3D','3+1D'}
         axes(hsim.axes_Magn)
@@ -1882,7 +1913,7 @@ switch get(hsim.popupmenu_Pulse,'Value')
         line([1,hsim.nNo],[0,0],'linewidth',1,'color','black')
         line([1,hsim.nNo],[2.2,2.2],'linewidth',1,'color','black')
         line([1,hsim.nNo],[4.2,4.2],'linewidth',1,'color','black')
-        case {9,14}
+    case {9,14}
         line([1,hsim.nNo],[0,0],'linewidth',1,'color','black')
         line([1,hsim.nNo],[2.2,2.2],'linewidth',1,'color','black')
         line([1,hsim.nNo],[4.2,4.2],'linewidth',1,'color','black')
@@ -1894,10 +1925,9 @@ hold off
 axis tight
 
 set(hsim.axes_Pulse,'XTick',(hsim.axp.Dim1axis),'YTick',hsim.axp.Dim2axis)
-        set(hsim.axes_Pulse,'XTickLabel',round(hsim.axp.Dim1ticklabel),'YTickLabel',hsim.axp.Dim2ticklabel)
-%         set(hsim.axes_Pulse,'Ydir','normal')
-        xlabel(hsim.axp.Dim1label)
-        ylabel(hsim.axp.Dim2label)
+set(hsim.axes_Pulse,'XTickLabel',round(hsim.axp.Dim1ticklabel),'YTickLabel',hsim.axp.Dim2ticklabel)
+xlabel(hsim.axp.Dim1label)
+ylabel(hsim.axp.Dim2label)
 
 
 end
