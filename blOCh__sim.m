@@ -6,17 +6,17 @@ function varargout = blOCh__sim(Fun,spc,khr,opt,varargin)
 %
 %
 %     Copyright (C) 2017  Mads Sloth Vinding
-% 
+%
 %     This program is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 %     This program is distributed in the hope that it will be useful,
 %     but WITHOUT ANY WARRANTY; without even the implied warranty of
 %     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 %     GNU General Public License for more details.
-% 
+%
 %     You should have received a copy of the GNU General Public License
 %     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %
@@ -49,7 +49,7 @@ if isempty(Fun)
     valid_Shows = [1,0];
     def_Show = valid_Shows(1);
     
-
+    
     
     valid_SaveFigs = [1,0];
     def_SaveFig = valid_SaveFigs(1);
@@ -90,7 +90,7 @@ if isempty(Fun)
                                                                         try p.addParamValue('g',def_g,@(x)validateattributes(x,{'numeric'},{'size',[NaN,NaN,NaN],'real','finite'}));
                                                                             try p.addParamValue('Nuc',def_Nuc,@(x)any(strcmpi(x,valid_Nuc)));
                                                                                 try p.addParamValue('SaveFig',def_SaveFig,@(x)any(valid_SaveFigs));
-                                                                                        Status = 1;
+                                                                                    Status = 1;
                                                                                     
                                                                                 catch  me;Display_Message(['blOCh__sim: ',me.message],2);end
                                                                             catch  me;Display_Message(['blOCh__sim: ',me.message],2);end
@@ -186,7 +186,7 @@ if isempty(Fun)
                 sim.OptNum = 2;
             end
             sim.dt = opt.dt;
-            
+            sim.gamma = khr.gamma;
             Nact = opt.N;
             
         elseif isempty(opt) && ~isempty(khr)
@@ -211,11 +211,12 @@ if isempty(Fun)
             end
             
             
-%             sim.dt = sim.temp.dt; % bug 170309
+            %             sim.dt = sim.temp.dt; % bug 170309
             sim.dt = khr.dt;
             sim.uo = sim.temp.u;
             sim.vo = sim.temp.v;
             sim.Nuc = khr.Nuc;
+            sim.gamma = khr.gamma;
             Nact = size(sim.uo,2);
             Kact = size(sim.uo,3);
             sim.MaxIter = Kact-1;
@@ -343,9 +344,9 @@ if isempty(Fun)
                 k_counter = 1;
                 for k = sim.k
                     if size(sim.g,3)>1
-                    g = sim.g(:,:,k);
+                        g = sim.g(:,:,k);
                     else
-                      g = sim.g;  
+                        g = sim.g;
                     end
                     for s = sim.s
                         
@@ -423,10 +424,10 @@ if isempty(Fun)
         sim.idxtot=spc.idxtot;
         
         if sim.Show > 0
-        sim.fig = Show_Sim(sim);
+            sim.fig = Show_Sim(sim);
         end
         
-
+        
         
         
         
@@ -437,7 +438,7 @@ else
     fun = str2func(Fun);
     test = version('-release');
     if strcmp(test,'2015a')
-    v = [];
+        v = [];
     else
         v = {};
     end
@@ -601,7 +602,7 @@ global hsim
 hsim.sim = varargin{1};
 
 
-    hsim.fig = figure('Visible','on');
+hsim.fig = figure('Visible','on');
 
 
 mp = get(0, 'MonitorPositions');
@@ -622,33 +623,36 @@ set(hsim.fig,'Units','normalized')
 clear varargin
 %%
 
-    hsim.axes1 = axes('Parent',hsim.fig,'Visible','on');
-hsim.axes2 = axes('Parent',hsim.fig,'Visible','on');
+hsim.axes_Magn = axes('Parent',hsim.fig,'Visible','on');
+hsim.axes_Colorbar = axes('Parent',hsim.fig,'Visible','on');
+hsim.axes_Pulse = axes('Parent',hsim.fig,'Visible','on');
 
 
 hsim.listbox1= uicontrol('Style','listbox','Callback',@listbox1_Callback);
 
-hsim.slider1= uicontrol('Style','slider','Callback',@slider1_Callback);
-hsim.slider2= uicontrol('Style','slider','Callback',@slider2_Callback);
-hsim.slider3= uicontrol('Style','slider','Callback',@slider3_Callback);
-hsim.slider4= uicontrol('Style','slider','Callback',@slider4_Callback);
-hsim.slider5= uicontrol('Style','slider','Callback',@slider5_Callback);
-hsim.slider6= uicontrol('Style','slider','Callback',@slider6_Callback);
-hsim.slider7= uicontrol('Style','slider','Callback',@slider7_Callback);
-hsim.popupmenu1= uicontrol('Style','popupmenu','Callback',@popupmenu1_Callback);
-hsim.pushbutton1= uicontrol('Style','pushbutton','Callback',@pushbutton1_Callback);
-hsim.pushbutton2= uicontrol('Style','pushbutton','Callback',@pushbutton2_Callback);
-hsim.pushbutton3= uicontrol('Style','pushbutton','Callback',@pushbutton3_Callback);
+hsim.slider_n= uicontrol('Style','slider','Callback',@slider_n_Callback);
+hsim.slider_Sl= uicontrol('Style','slider','Callback',@slider_Sl_Callback);
+hsim.slider_Tx= uicontrol('Style','slider','Callback',@slider_Tx_Callback);
+hsim.slider_freq= uicontrol('Style','slider','Callback',@slider_freq_Callback);
+hsim.slider_k= uicontrol('Style','slider','Callback',@slider_k_Callback);
+hsim.slider_B1= uicontrol('Style','slider','Callback',@slider_B1_Callback);
+hsim.slider_B0= uicontrol('Style','slider','Callback',@slider_B0_Callback);
+hsim.popupmenu_Magn= uicontrol('Style','popupmenu','Callback',@popupmenu_Magn_Callback);
+hsim.popupmenu_Pulse= uicontrol('Style','popupmenu','Callback',@popupmenu_Pulse_Callback);
+
+hsim.pushbutton_playx1= uicontrol('Style','pushbutton','Callback',@pushbutton_playx1_Callback);
+hsim.pushbutton_playx10= uicontrol('Style','pushbutton','Callback',@pushbutton_playx10_Callback);
+hsim.pushbutton_playx100= uicontrol('Style','pushbutton','Callback',@pushbutton_playx100_Callback);
 
 hsim.text1= uicontrol('Style','text');
 hsim.text2= uicontrol('Style','text');
-hsim.text3= uicontrol('Style','text');
-hsim.text4= uicontrol('Style','text');
-hsim.text5= uicontrol('Style','text');
-hsim.text6= uicontrol('Style','text');
-hsim.text7= uicontrol('Style','text');
-hsim.text8= uicontrol('Style','text');
-hsim.text9= uicontrol('Style','text');
+hsim.text_n= uicontrol('Style','text');
+hsim.text_Sl= uicontrol('Style','text');
+hsim.text_Tx= uicontrol('Style','text');
+hsim.text_freq= uicontrol('Style','text');
+hsim.text_k= uicontrol('Style','text');
+hsim.text_B1= uicontrol('Style','text');
+hsim.text_B0= uicontrol('Style','text');
 
 
 Sliderheight = 0.02;
@@ -656,253 +660,280 @@ Textheight = 0.02;
 Textwidth = 0.04;
 Spacer  = 0.001;
 
-set(hsim.slider1,'Units','normalized')
-set(hsim.slider2,'Units','normalized')
-set(hsim.slider3,'Units','normalized')
-set(hsim.slider4,'Units','normalized')
-set(hsim.slider5,'Units','normalized')
-set(hsim.slider6,'Units','normalized')
-set(hsim.slider7,'Units','normalized')
+set(hsim.slider_n,'Units','normalized')
+set(hsim.slider_Sl,'Units','normalized')
+set(hsim.slider_Tx,'Units','normalized')
+set(hsim.slider_freq,'Units','normalized')
+set(hsim.slider_k,'Units','normalized')
+set(hsim.slider_B1,'Units','normalized')
+set(hsim.slider_B0,'Units','normalized')
 
-set(hsim.pushbutton1,'Units','normalized')
-set(hsim.pushbutton2,'Units','normalized')
-set(hsim.pushbutton3,'Units','normalized')
+set(hsim.pushbutton_playx1,'Units','normalized')
+set(hsim.pushbutton_playx10,'Units','normalized')
+set(hsim.pushbutton_playx100,'Units','normalized')
 
 
 set(hsim.text1,'Units','normalized')
 set(hsim.text2,'Units','normalized')
-set(hsim.text3,'Units','normalized')
-set(hsim.text4,'Units','normalized')
-set(hsim.text5,'Units','normalized')
-set(hsim.text6,'Units','normalized')
-set(hsim.text7,'Units','normalized')
-set(hsim.text8,'Units','normalized')
-set(hsim.text9,'Units','normalized')
+set(hsim.text_n,'Units','normalized')
+set(hsim.text_Sl,'Units','normalized')
+set(hsim.text_Tx,'Units','normalized')
+set(hsim.text_freq,'Units','normalized')
+set(hsim.text_k,'Units','normalized')
+set(hsim.text_B1,'Units','normalized')
+set(hsim.text_B0,'Units','normalized')
 
-set(hsim.axes1,'Units','normalized')
-set(hsim.axes2,'Units','normalized')
-
+set(hsim.axes_Magn,'Units','normalized')
+set(hsim.axes_Colorbar,'Units','normalized')
+set(hsim.axes_Pulse,'Units','normalized')
 set(hsim.listbox1,'Units','normalized')
+% set(hsim.listboxPulse,'Units','normalized')
 
-set(hsim.popupmenu1,'Units','normalized')
+set(hsim.popupmenu_Magn,'Units','normalized')
+
+set(hsim.popupmenu_Pulse,'Units','normalized')
 
 
 %%
 
-hsim.r.x_slider1 = 0.69;
-hsim.r.x_slider2 = 0.69;
-hsim.r.x_slider3 = 0.69;
-hsim.r.x_slider4 = 0.69;
-hsim.r.x_slider5 = 0.69;
-hsim.r.x_slider6 = 0.69;
-hsim.r.x_slider7 = 0.69;
+hsim.r.x_slider_n = 0.69;
+hsim.r.x_slider_Sl = 0.69;
+hsim.r.x_slider_Tx = 0.69;
+hsim.r.x_slider_freq = 0.69;
+hsim.r.x_slider_k = 0.69;
+hsim.r.x_slider_B1 = 0.69;
+hsim.r.x_slider_B0 = 0.69;
 
 
 
-hsim.r.y_slider7 = 0.005;
-hsim.r.y_slider6 = hsim.r.y_slider7+Sliderheight+0.001;
-hsim.r.y_slider5 = hsim.r.y_slider6+Sliderheight+0.001;
-hsim.r.y_slider4 = hsim.r.y_slider5+Sliderheight+0.001;
-hsim.r.y_slider3 = hsim.r.y_slider4+Sliderheight+0.001;
-hsim.r.y_slider2 = hsim.r.y_slider3+Sliderheight+0.001;
-hsim.r.y_slider1 = hsim.r.y_slider2+Sliderheight+0.001;
+hsim.r.y_slider_B0 = 0.6;
+hsim.r.y_slider_B1 = hsim.r.y_slider_B0+Sliderheight+0.001;
+hsim.r.y_slider_k = hsim.r.y_slider_B1+Sliderheight+0.001;
+hsim.r.y_slider_freq = hsim.r.y_slider_k+Sliderheight+0.001;
+hsim.r.y_slider_Tx = hsim.r.y_slider_freq+Sliderheight+0.001;
+hsim.r.y_slider_Sl = hsim.r.y_slider_Tx+Sliderheight+0.001;
+hsim.r.y_slider_n = hsim.r.y_slider_Sl+Sliderheight+0.001;
 
-hsim.r.w_slider1 = 0.3;
-hsim.r.w_slider2 = 0.3;
-hsim.r.w_slider3 = 0.3;
-hsim.r.w_slider4 = 0.3;
-hsim.r.w_slider5 = 0.3;
-hsim.r.w_slider6 = 0.3;
-hsim.r.w_slider7 = 0.3;
-
-hsim.r.h_slider1 = Sliderheight;
-hsim.r.h_slider2 = Sliderheight;
-hsim.r.h_slider3 = Sliderheight;
-hsim.r.h_slider4 = Sliderheight;
-hsim.r.h_slider5 = Sliderheight;
-hsim.r.h_slider6 = Sliderheight;
-hsim.r.h_slider7 = Sliderheight;
-
-hsim.r.x_axes1 = 0.05;
-hsim.r.xo_axes1 = 0.01;
-hsim.r.yo_axes1 = 0.2;
-hsim.r.y_axes1 = 0.25;
-hsim.r.ho_axes1 = 0.7;
-hsim.r.h_axes1 = 0.65;
-hsim.r.wo_axes1 = hsim.r.ho_axes1/WHratio;
-hsim.r.w_axes1 = hsim.r.h_axes1/WHratio;
-% WHratio
-hsim.r.x_axes2 = 0.625;
-hsim.r.y_axes2 = 0.25;
-hsim.r.h_axes2 = 0.65;
-hsim.r.w_axes2 = 0.02;
+hsim.r.y_text_B0 = hsim.r.y_slider_B0;
+hsim.r.y_text_B1 = hsim.r.y_slider_B1;
+hsim.r.y_text_k = hsim.r.y_slider_k;
+hsim.r.y_text_freq = hsim.r.y_slider_freq;
+hsim.r.y_text_Tx = hsim.r.y_slider_Tx;
+hsim.r.y_text_Sl = hsim.r.y_slider_Sl;
+hsim.r.y_text_n = hsim.r.y_slider_n;
 
 
-hsim.r.y_text9 = hsim.r.y_slider7;
-hsim.r.y_text8 = hsim.r.y_slider6;
-hsim.r.y_text7 = hsim.r.y_slider5;
-hsim.r.y_text6 = hsim.r.y_slider4;
-hsim.r.y_text5 = hsim.r.y_slider3;
-hsim.r.y_text4 = hsim.r.y_slider2;
-hsim.r.y_text3 = hsim.r.y_slider1;
 hsim.r.y_text1 = 0.91;%0.095+Sliderheight+Spacer;
 hsim.r.y_text2 = 0.2;% 0.05+Sliderheight+Spacer;
+
+hsim.r.w_slider_n = 0.3;
+hsim.r.w_slider_Sl = 0.3;
+hsim.r.w_slider_Tx = 0.3;
+hsim.r.w_slider_freq = 0.3;
+hsim.r.w_slider_k = 0.3;
+hsim.r.w_slider_B1 = 0.3;
+hsim.r.w_slider_B0 = 0.3;
+
+hsim.r.h_slider_n = Sliderheight;
+hsim.r.h_slider_Sl = Sliderheight;
+hsim.r.h_slider_Tx = Sliderheight;
+hsim.r.h_slider_freq = Sliderheight;
+hsim.r.h_slider_k = Sliderheight;
+hsim.r.h_slider_B1 = Sliderheight;
+hsim.r.h_slider_B0 = Sliderheight;
+
+hsim.r.x_axes_Magn = 0.05;
+hsim.r.xo_axes_Magn = 0.01;
+hsim.r.yo_axes_Magn = 0.25;
+hsim.r.y_axes_Magn = 0.3;
+hsim.r.ho_axes_Magn = 0.7;
+hsim.r.h_axes_Magn = 0.65;
+hsim.r.wo_axes_Magn = hsim.r.ho_axes_Magn/WHratio;
+hsim.r.w_axes_Magn = hsim.r.h_axes_Magn/WHratio;
+% WHratio
+hsim.r.x_axes_Colorbar = 0.625;
+hsim.r.y_axes_Colorbar = 0.25;
+hsim.r.h_axes_Colorbar = 0.65;
+hsim.r.w_axes_Colorbar = 0.02;
+
+hsim.r.x_axes_Pulse = 0.05;
+hsim.r.xo_axes_Pulse = 0.01;
+hsim.r.yo_axes_Pulse = 0.01;
+hsim.r.y_axes_Pulse = 0.05;
+hsim.r.ho_axes_Pulse = 0.20;
+hsim.r.h_axes_Pulse = 0.19;
+hsim.r.wo_axes_Pulse = 0.95;
+hsim.r.w_axes_Pulse = 0.9;
+
+
+
+
 
 
 hsim.r.w_text1 =0.05;% 0.98;
 hsim.r.w_text2 =0.05;% 0.48;
-hsim.r.w_text3 =0.19;% 0.48;
-hsim.r.w_text4 =0.19;% 0.48;
-hsim.r.w_text5 =0.19;% 0.48;
-hsim.r.w_text6 =0.19;% 0.2;
-hsim.r.w_text7 =0.19;% 0.2;
-hsim.r.w_text8 =0.19;% 0.2;
-hsim.r.w_text9 =0.19;% 0.2;
+hsim.r.w_text_n =0.19;% 0.48;
+hsim.r.w_text_Sl =0.19;% 0.48;
+hsim.r.w_text_Tx =0.19;% 0.48;
+hsim.r.w_text_freq =0.19;% 0.2;
+hsim.r.w_text_k =0.19;% 0.2;
+hsim.r.w_text_B1 =0.19;% 0.2;
+hsim.r.w_text_B0 =0.19;% 0.2;
 
 hsim.r.x_text1 = 0.62;
 hsim.r.x_text2 = 0.62;
-hsim.r.x_text3 = 0.49;
-hsim.r.x_text4 = 0.49;
-hsim.r.x_text5 = 0.49;
-hsim.r.x_text6 = 0.49;
-hsim.r.x_text7 = 0.49;
-hsim.r.x_text8 = 0.49;
-hsim.r.x_text9 = 0.49;
+hsim.r.x_text_n = 0.49;
+hsim.r.x_text_Sl = 0.49;
+hsim.r.x_text_Tx = 0.49;
+hsim.r.x_text_freq = 0.49;
+hsim.r.x_text_k = 0.49;
+hsim.r.x_text_B1 = 0.49;
+hsim.r.x_text_B0 = 0.49;
 
 hsim.r.h_text1 = Textheight;
 hsim.r.h_text2 = Textheight;
-hsim.r.h_text3 = Textheight;
-hsim.r.h_text4 = Textheight;
-hsim.r.h_text5 = Textheight;
-hsim.r.h_text6 = Textheight;
-hsim.r.h_text7 = Textheight;
-hsim.r.h_text8 = Textheight;
-hsim.r.h_text9 = Textheight;
+hsim.r.h_text_n = Textheight;
+hsim.r.h_text_Sl = Textheight;
+hsim.r.h_text_Tx = Textheight;
+hsim.r.h_text_freq = Textheight;
+hsim.r.h_text_k = Textheight;
+hsim.r.h_text_B1 = Textheight;
+hsim.r.h_text_B0 = Textheight;
 
-hsim.r.x_popupmenu1 = 0.005;
-hsim.r.y_popupmenu1 = 0.94;
-hsim.r.w_popupmenu1 = 0.68;
-hsim.r.h_popupmenu1 = 0.05;
+hsim.r.x_popupmenu_Magn = 0.005;
+hsim.r.y_popupmenu_Magn = 0.94;
+hsim.r.w_popupmenu_Magn = 0.1;
+hsim.r.h_popupmenu_Magn = 0.05;
+
+hsim.r.x_popupmenu_Pulse = 0.005+0.1+0.01;
+hsim.r.y_popupmenu_Pulse = 0.94;
+hsim.r.w_popupmenu_Pulse = 0.1;
+hsim.r.h_popupmenu_Pulse = 0.05;
 
 
 hsim.r.x_listbox1 = 0.69;
-hsim.r.y_listbox1 = 0.2;%0.2+0.266667*2;
+hsim.r.y_listbox1 = 0.8;%0.2+0.266667*2;
 hsim.r.w_listbox1 = 0.3;
-hsim.r.h_listbox1 = 0.26*3;% 0.26;
+hsim.r.h_listbox1 = 0.18;% 0.26;
 
 
-hsim.r.x_pushbutton1 = 0.69;
-hsim.r.y_pushbutton1 = 0.17;
-hsim.r.w_pushbutton1 = 0.1;
-hsim.r.h_pushbutton1 = 0.02;
 
-hsim.r.x_pushbutton2 = 0.69+0.1;
-hsim.r.y_pushbutton2 = 0.17;
-hsim.r.w_pushbutton2 = 0.1;
-hsim.r.h_pushbutton2 = 0.02;
+hsim.r.x_pushbutton_playx1 = 0.69;
+hsim.r.y_pushbutton_playx1 = 0.77;
+hsim.r.w_pushbutton_playx1 = 0.1;
+hsim.r.h_pushbutton_playx1 = 0.02;
 
-hsim.r.x_pushbutton3 = 0.69+0.2;
-hsim.r.y_pushbutton3 = 0.17;
-hsim.r.w_pushbutton3 = 0.1;
-hsim.r.h_pushbutton3 = 0.02;
+hsim.r.x_pushbutton_playx10 = 0.69+0.1;
+hsim.r.y_pushbutton_playx10 = 0.77;
+hsim.r.w_pushbutton_playx10 = 0.1;
+hsim.r.h_pushbutton_playx10 = 0.02;
 
-set(hsim.slider1,'Position',[hsim.r.x_slider1,hsim.r.y_slider1,hsim.r.w_slider1,hsim.r.h_slider1])
-set(hsim.slider2,'Position',[hsim.r.x_slider2,hsim.r.y_slider2,hsim.r.w_slider2,hsim.r.h_slider2])
-set(hsim.slider3,'Position',[hsim.r.x_slider3,hsim.r.y_slider3,hsim.r.w_slider3,hsim.r.h_slider3])
-set(hsim.slider4,'Position',[hsim.r.x_slider4,hsim.r.y_slider4,hsim.r.w_slider4,hsim.r.h_slider4])
-set(hsim.slider5,'Position',[hsim.r.x_slider5,hsim.r.y_slider5,hsim.r.w_slider5,hsim.r.h_slider5])
-set(hsim.slider6,'Position',[hsim.r.x_slider6,hsim.r.y_slider6,hsim.r.w_slider6,hsim.r.h_slider6])
-set(hsim.slider7,'Position',[hsim.r.x_slider7,hsim.r.y_slider7,hsim.r.w_slider7,hsim.r.h_slider7])
+hsim.r.x_pushbutton_playx100 = 0.69+0.2;
+hsim.r.y_pushbutton_playx100 = 0.77;
+hsim.r.w_pushbutton_playx100 = 0.1;
+hsim.r.h_pushbutton_playx100 = 0.02;
+
+set(hsim.slider_n,'Position',[hsim.r.x_slider_n,hsim.r.y_slider_n,hsim.r.w_slider_n,hsim.r.h_slider_n])
+set(hsim.slider_Sl,'Position',[hsim.r.x_slider_Sl,hsim.r.y_slider_Sl,hsim.r.w_slider_Sl,hsim.r.h_slider_Sl])
+set(hsim.slider_Tx,'Position',[hsim.r.x_slider_Tx,hsim.r.y_slider_Tx,hsim.r.w_slider_Tx,hsim.r.h_slider_Tx])
+set(hsim.slider_freq,'Position',[hsim.r.x_slider_freq,hsim.r.y_slider_freq,hsim.r.w_slider_freq,hsim.r.h_slider_freq])
+set(hsim.slider_k,'Position',[hsim.r.x_slider_k,hsim.r.y_slider_k,hsim.r.w_slider_k,hsim.r.h_slider_k])
+set(hsim.slider_B1,'Position',[hsim.r.x_slider_B1,hsim.r.y_slider_B1,hsim.r.w_slider_B1,hsim.r.h_slider_B1])
+set(hsim.slider_B0,'Position',[hsim.r.x_slider_B0,hsim.r.y_slider_B0,hsim.r.w_slider_B0,hsim.r.h_slider_B0])
 
 set(hsim.text1,'Position',[hsim.r.x_text1,hsim.r.y_text1,hsim.r.w_text1,hsim.r.h_text1])
 set(hsim.text2,'Position',[hsim.r.x_text2,hsim.r.y_text2,hsim.r.w_text2,hsim.r.h_text2])
-set(hsim.text3,'Position',[hsim.r.x_text3,hsim.r.y_text3,hsim.r.w_text3,hsim.r.h_text3],'HorizontalAlignment','right')
-set(hsim.text4,'Position',[hsim.r.x_text4,hsim.r.y_text4,hsim.r.w_text4,hsim.r.h_text4],'HorizontalAlignment','right')
-set(hsim.text5,'Position',[hsim.r.x_text5,hsim.r.y_text5,hsim.r.w_text5,hsim.r.h_text5],'HorizontalAlignment','right')
-set(hsim.text6,'Position',[hsim.r.x_text6,hsim.r.y_text6,hsim.r.w_text6,hsim.r.h_text6],'HorizontalAlignment','right')
-set(hsim.text7,'Position',[hsim.r.x_text7,hsim.r.y_text7,hsim.r.w_text7,hsim.r.h_text7],'HorizontalAlignment','right')
-set(hsim.text8,'Position',[hsim.r.x_text8,hsim.r.y_text8,hsim.r.w_text8,hsim.r.h_text8],'HorizontalAlignment','right')
-set(hsim.text9,'Position',[hsim.r.x_text9,hsim.r.y_text9,hsim.r.w_text9,hsim.r.h_text9],'HorizontalAlignment','right')
+set(hsim.text_n,'Position',[hsim.r.x_text_n,hsim.r.y_text_n,hsim.r.w_text_n,hsim.r.h_text_n],'HorizontalAlignment','right')
+set(hsim.text_Sl,'Position',[hsim.r.x_text_Sl,hsim.r.y_text_Sl,hsim.r.w_text_Sl,hsim.r.h_text_Sl],'HorizontalAlignment','right')
+set(hsim.text_Tx,'Position',[hsim.r.x_text_Tx,hsim.r.y_text_Tx,hsim.r.w_text_Tx,hsim.r.h_text_Tx],'HorizontalAlignment','right')
+set(hsim.text_freq,'Position',[hsim.r.x_text_freq,hsim.r.y_text_freq,hsim.r.w_text_freq,hsim.r.h_text_freq],'HorizontalAlignment','right')
+set(hsim.text_k,'Position',[hsim.r.x_text_k,hsim.r.y_text_k,hsim.r.w_text_k,hsim.r.h_text_k],'HorizontalAlignment','right')
+set(hsim.text_B1,'Position',[hsim.r.x_text_B1,hsim.r.y_text_B1,hsim.r.w_text_B1,hsim.r.h_text_B1],'HorizontalAlignment','right')
+set(hsim.text_B0,'Position',[hsim.r.x_text_B0,hsim.r.y_text_B0,hsim.r.w_text_B0,hsim.r.h_text_B0],'HorizontalAlignment','right')
 
-set(hsim.axes1,'OuterPosition',[hsim.r.xo_axes1,hsim.r.yo_axes1,hsim.r.wo_axes1,hsim.r.ho_axes1])
-set(hsim.axes1,'Position',[hsim.r.x_axes1,hsim.r.y_axes1,hsim.r.w_axes1,hsim.r.h_axes1])
-set(hsim.axes2,'Position',[hsim.r.x_axes2,hsim.r.y_axes2,hsim.r.w_axes2,hsim.r.h_axes2])
+set(hsim.axes_Magn,'OuterPosition',[hsim.r.xo_axes_Magn,hsim.r.yo_axes_Magn,hsim.r.wo_axes_Magn,hsim.r.ho_axes_Magn])
+set(hsim.axes_Magn,'Position',[hsim.r.x_axes_Magn,hsim.r.y_axes_Magn,hsim.r.w_axes_Magn,hsim.r.h_axes_Magn])
+
+set(hsim.axes_Pulse,'OuterPosition',[hsim.r.xo_axes_Pulse,hsim.r.yo_axes_Pulse,hsim.r.wo_axes_Pulse,hsim.r.ho_axes_Pulse])
+set(hsim.axes_Pulse,'Position',[hsim.r.x_axes_Pulse,hsim.r.y_axes_Pulse,hsim.r.w_axes_Pulse,hsim.r.h_axes_Pulse])
+
+set(hsim.axes_Colorbar,'Position',[hsim.r.x_axes_Colorbar,hsim.r.y_axes_Colorbar,hsim.r.w_axes_Colorbar,hsim.r.h_axes_Colorbar])
 set(hsim.listbox1,'Position',[hsim.r.x_listbox1,hsim.r.y_listbox1,hsim.r.w_listbox1,hsim.r.h_listbox1])
-% set(hsim.listbox2,'Position',[hsim.r.x_listbox2,hsim.r.y_listbox2,hsim.r.w_listbox2,hsim.r.h_listbox2])
-% set(hsim.listbox3,'Position',[hsim.r.x_listbox3,hsim.r.y_listbox3,hsim.r.w_listbox3,hsim.r.h_listbox3])
-set(hsim.popupmenu1,'Position',[hsim.r.x_popupmenu1,hsim.r.y_popupmenu1,hsim.r.w_popupmenu1,hsim.r.h_popupmenu1])
 
-set(hsim.pushbutton1,'Position',[hsim.r.x_pushbutton1,hsim.r.y_pushbutton1,hsim.r.w_pushbutton1,hsim.r.h_pushbutton1],'String','Play x1')
-set(hsim.pushbutton2,'Position',[hsim.r.x_pushbutton2,hsim.r.y_pushbutton2,hsim.r.w_pushbutton2,hsim.r.h_pushbutton2],'String','Play x10')
-set(hsim.pushbutton3,'Position',[hsim.r.x_pushbutton3,hsim.r.y_pushbutton3,hsim.r.w_pushbutton3,hsim.r.h_pushbutton3],'String','Play x100')
+set(hsim.popupmenu_Magn,'Position',[hsim.r.x_popupmenu_Magn,hsim.r.y_popupmenu_Magn,hsim.r.w_popupmenu_Magn,hsim.r.h_popupmenu_Magn])
+set(hsim.popupmenu_Pulse,'Position',[hsim.r.x_popupmenu_Pulse,hsim.r.y_popupmenu_Pulse,hsim.r.w_popupmenu_Pulse,hsim.r.h_popupmenu_Pulse])
+
+set(hsim.pushbutton_playx1,'Position',[hsim.r.x_pushbutton_playx1,hsim.r.y_pushbutton_playx1,hsim.r.w_pushbutton_playx1,hsim.r.h_pushbutton_playx1],'String','Play x1')
+set(hsim.pushbutton_playx10,'Position',[hsim.r.x_pushbutton_playx10,hsim.r.y_pushbutton_playx10,hsim.r.w_pushbutton_playx10,hsim.r.h_pushbutton_playx10],'String','Play x10')
+set(hsim.pushbutton_playx100,'Position',[hsim.r.x_pushbutton_playx100,hsim.r.y_pushbutton_playx100,hsim.r.w_pushbutton_playx100,hsim.r.h_pushbutton_playx100],'String','Play x100')
 
 if str2double(hsim.sim.Dim(1)) > 1
-    set(hsim.axes2,'Visible','on')
+    set(hsim.axes_Colorbar,'Visible','on')
     set(hsim.text1,'Visible','on')
     set(hsim.text2,'Visible','on')
 else
-    set(hsim.axes2,'Visible','off')
+    set(hsim.axes_Colorbar,'Visible','off')
     set(hsim.text1,'Visible','off')
     set(hsim.text2,'Visible','off')
 end
-set(hsim.text6,'Visible','on')
-set(hsim.text7,'Visible','on')
+set(hsim.text_freq,'Visible','on')
+set(hsim.text_k,'Visible','on')
 %%
 if strcmpi(hsim.sim.sim_n,'last')
-    set(hsim.pushbutton1,'Visible','off')
-    set(hsim.pushbutton2,'Visible','off')
-    set(hsim.pushbutton3,'Visible','off')
-    set(hsim.slider1,'Visible','off','Value',1)
-    set(hsim.text3,'Visible','off');
+    set(hsim.pushbutton_playx1,'Visible','off')
+    set(hsim.pushbutton_playx10,'Visible','off')
+    set(hsim.pushbutton_playx100,'Visible','off')
+    set(hsim.slider_n,'Visible','off','Value',1)
+    set(hsim.text_n,'Visible','off');
     hsim.nNo = 1;
-    set(hsim.pushbutton1,'Visible','off')
+    set(hsim.pushbutton_playx1,'Visible','off')
 elseif strcmpi(hsim.sim.sim_n,'all')
-    set(hsim.pushbutton1,'Visible','on')
-    set(hsim.pushbutton2,'Visible','on')
-    set(hsim.pushbutton3,'Visible','on')
-    set(hsim.slider1,'Min',1)
-    set(hsim.slider1,'Max',hsim.sim.N)
+    set(hsim.pushbutton_playx1,'Visible','on')
+    set(hsim.pushbutton_playx10,'Visible','on')
+    set(hsim.pushbutton_playx100,'Visible','on')
+    set(hsim.slider_n,'Min',1)
+    set(hsim.slider_n,'Max',hsim.sim.N)
     TimeSliderStep = [1, 1] / (hsim.sim.N - 1);
-    set(hsim.slider1,'SliderStep',TimeSliderStep)
+    set(hsim.slider_n,'SliderStep',TimeSliderStep)
     hsim.nNo = hsim.sim.N;
-    set(hsim.slider1,'Visible','on','Value',hsim.nNo)
-    set(hsim.text3,'Visible','on','String',sprintf('Timeframe %i dt (%1.1e s) of %i dt (%1.1e s)',hsim.nNo,hsim.nNo*hsim.sim.dt,hsim.sim.N,hsim.sim.N.*hsim.sim.dt))
+    set(hsim.slider_n,'Visible','on','Value',hsim.nNo)
+    set(hsim.text_n,'Visible','on','String',sprintf('Timeframe %i dt (%1.1e s) of %i dt (%1.1e s)',hsim.nNo,hsim.nNo*hsim.sim.dt,hsim.sim.N,hsim.sim.N.*hsim.sim.dt))
     
 end
 
 %%
 if hsim.sim.Dim(1) == '3'
-    set(hsim.slider2,'Min',1)
-    set(hsim.slider2,'Max',hsim.sim.R(3))
+    set(hsim.slider_Sl,'Min',1)
+    set(hsim.slider_Sl,'Max',hsim.sim.R(3))
     SliceSliderStep = [1, 1] / (hsim.sim.R(3) - 1);
-    set(hsim.slider2,'SliderStep',SliceSliderStep)
+    set(hsim.slider_Sl,'SliderStep',SliceSliderStep)
     hsim.SlNo = round(hsim.sim.R(3)/2);
-    set(hsim.slider2,'Visible','on','Value',hsim.SlNo)
-    set(hsim.text4,'Visible','on','String',sprintf('Slice %i of %i',hsim.SlNo,hsim.sim.R(3)))
+    set(hsim.slider_Sl,'Visible','on','Value',hsim.SlNo)
+    set(hsim.text_Sl,'Visible','on','String',sprintf('Slice %i of %i',hsim.SlNo,hsim.sim.R(3)))
     
 else
-    set(hsim.slider2,'Visible','off','Value',1)
-    set(hsim.text4,'Visible','off');
+    set(hsim.slider_Sl,'Visible','off','Value',1)
+    set(hsim.text_Sl,'Visible','off');
     hsim.SlNo = 1;
 end
 %%
 
 
 if hsim.sim.pTx > 1 && strcmpi(hsim.sim.sim_Tx,'sep')
-    set(hsim.slider3,'Min',1)
-    set(hsim.slider3,'Max',hsim.sim.pTx+1)
+    set(hsim.slider_Tx,'Min',1)
+    set(hsim.slider_Tx,'Max',hsim.sim.pTx+1)
     ChannelSliderStep = [1, 1] / (hsim.sim.pTx+1 - 1);
-    set(hsim.slider3,'SliderStep',ChannelSliderStep)
+    set(hsim.slider_Tx,'SliderStep',ChannelSliderStep)
     hsim.pTxNo = hsim.sim.pTx+1;
-    set(hsim.slider3,'Visible','on','Value',hsim.pTxNo)
+    set(hsim.slider_Tx,'Visible','on','Value',hsim.pTxNo)
     if hsim.pTxNo == hsim.sim.pTx+1
-        set(hsim.text5,'Visible','on','String',sprintf('All %i Tx',hsim.sim.pTx))
+        set(hsim.text_Tx,'Visible','on','String',sprintf('All %i Tx',hsim.sim.pTx))
     else
-        set(hsim.text5,'Visible','on','String',sprintf('Tx %i of %i',hsim.pTxNo,hsim.sim.pTx))
+        set(hsim.text_Tx,'Visible','on','String',sprintf('Tx %i of %i',hsim.pTxNo,hsim.sim.pTx))
     end
 else
-    set(hsim.slider3,'Visible','off','Value',1)
-    set(hsim.text5,'Visible','off');
+    set(hsim.slider_Tx,'Visible','off','Value',1)
+    set(hsim.text_Tx,'Visible','off');
     hsim.pTxNo = 1;
 end
 
@@ -911,103 +942,117 @@ end
 if hsim.sim.Dim(2) == '+' && hsim.sim.Dim(1) ~= '0'
     hsim.freq = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),hsim.sim.Rv);
     
-    set(hsim.slider4,'Min',1)
-    set(hsim.slider4,'Max',hsim.sim.Rv)
+    set(hsim.slider_freq,'Min',1)
+    set(hsim.slider_freq,'Max',hsim.sim.Rv)
     FreqSliderStep = [1, 1] / (hsim.sim.Rv - 1);
-    set(hsim.slider4,'SliderStep',FreqSliderStep)
+    set(hsim.slider_freq,'SliderStep',FreqSliderStep)
     hsim.freqNo = round(hsim.sim.Rv/2);
     
     if hsim.sim.Dim(1) == '1'
         
-        set(hsim.slider4,'Visible','off')
-        set(hsim.text6,'Visible','off')
+        set(hsim.slider_freq,'Visible','off')
+        set(hsim.text_freq,'Visible','off')
     else
-        set(hsim.slider4,'Visible','on','Value',hsim.freqNo)
-        set(hsim.text6,'Visible','on','String',sprintf('Frequency: %.2f [Hz]',hsim.freq(hsim.freqNo)))
+        set(hsim.slider_freq,'Visible','on','Value',hsim.freqNo)
+        set(hsim.text_freq,'Visible','on','String',sprintf('Frequency: %.2f [Hz]',hsim.freq(hsim.freqNo)))
         
     end
 else
-    set(hsim.slider4,'Visible','off','Value',1)
-    set(hsim.text6,'Visible','off');
+    set(hsim.slider_freq,'Visible','off','Value',1)
+    set(hsim.text_freq,'Visible','off');
     hsim.freqNo = 1;
 end
 %%
 if hsim.sim.K > 1
-    set(hsim.slider5,'Min',1)
-    set(hsim.slider5,'Max',hsim.sim.K)
+    set(hsim.slider_k,'Min',1)
+    set(hsim.slider_k,'Max',hsim.sim.K)
     IterationSliderStep = [1, 1] / (hsim.sim.K - 1);
-    set(hsim.slider5,'SliderStep',IterationSliderStep)
+    set(hsim.slider_k,'SliderStep',IterationSliderStep)
     hsim.kNo = hsim.sim.K;
-    set(hsim.slider5,'Visible','on','Value',hsim.kNo)
+    set(hsim.slider_k,'Visible','on','Value',hsim.kNo)
     
-    set(hsim.text7,'Visible','on','String',sprintf('Iteration %i of %i',hsim.kNo-1,hsim.sim.K-1))
+    set(hsim.text_k,'Visible','on','String',sprintf('Iteration %i of %i',hsim.kNo-1,hsim.sim.K-1))
 else
-    set(hsim.slider5,'Visible','off','Value',1)
-    set(hsim.text7,'Visible','off');
+    set(hsim.slider_k,'Visible','off','Value',1)
+    set(hsim.text_k,'Visible','off');
     hsim.kNo = 1;
 end
 %%
 
 %%
 if hsim.sim.B1inhom_N==1
-    set(hsim.slider6,'Visible','off','Value',1)
-    set(hsim.text8,'Visible','off');
+    set(hsim.slider_B1,'Visible','off','Value',1)
+    set(hsim.text_B1,'Visible','off');
     hsim.nB1inh = 1;
 else
-    set(hsim.slider6,'Min',1)
-    set(hsim.slider6,'Max',hsim.sim.B1inhom_N)
+    set(hsim.slider_B1,'Min',1)
+    set(hsim.slider_B1,'Max',hsim.sim.B1inhom_N)
     B1SliderStep = [1, 1] / (hsim.sim.B1inhom_N - 1);
-    set(hsim.slider6,'SliderStep',B1SliderStep)
+    set(hsim.slider_B1,'SliderStep',B1SliderStep)
     hsim.nB1inh = round(hsim.sim.B1inhom_N/2);
-    set(hsim.slider6,'Visible','on','Value',hsim.nB1inh)
-    set(hsim.text8,'Visible','on','String',sprintf('B1 scale %i of %i (%1.1e %%)',hsim.nB1inh,hsim.sim.B1inhom_N,hsim.sim.B1inhom_scales(hsim.nB1inh)))
+    set(hsim.slider_B1,'Visible','on','Value',hsim.nB1inh)
+    set(hsim.text_B1,'Visible','on','String',sprintf('B1 scale %i of %i (%1.1e %%)',hsim.nB1inh,hsim.sim.B1inhom_N,hsim.sim.B1inhom_scales(hsim.nB1inh)))
     
 end
 %%
 if hsim.sim.B0inhom_N==1
-    set(hsim.slider7,'Visible','off','Value',1)
-    set(hsim.text9,'Visible','off');
+    set(hsim.slider_B0,'Visible','off','Value',1)
+    set(hsim.text_B0,'Visible','off');
     hsim.nB0inh = 1;
 else
-    set(hsim.slider7,'Min',1)
-    set(hsim.slider7,'Max',hsim.sim.B1inhom_N)
+    set(hsim.slider_B0,'Min',1)
+    set(hsim.slider_B0,'Max',hsim.sim.B1inhom_N)
     B0SliderStep = [1, 1] / (hsim.sim.B0inhom_N - 1);
-    set(hsim.slider7,'SliderStep',B0SliderStep)
+    set(hsim.slider_B0,'SliderStep',B0SliderStep)
     hsim.nB0inh = round(hsim.sim.B0inhom_N/2);
-    set(hsim.slider7,'Visible','on','Value',hsim.nB0inh)
-    set(hsim.text9,'Visible','on','String',sprintf('B0 offset %i of %i (%1.1e Hz)',hsim.nB0inh,hsim.sim.B0inhom_N,hsim.sim.B0inhom_offsets(hsim.nB0inh)))
+    set(hsim.slider_B0,'Visible','on','Value',hsim.nB0inh)
+    set(hsim.text_B0,'Visible','on','String',sprintf('B0 offset %i of %i (%1.1e Hz)',hsim.nB0inh,hsim.sim.B0inhom_N,hsim.sim.B0inhom_offsets(hsim.nB0inh)))
     
 end
 %%
 List1 = Populate_Listbox(hsim.sim);
+
 set(hsim.listbox1,'String',List1);
 
 
 %%
-if strcmpi(hsim.sim.Dim(1),'3')
-    String = cell(1,8);
+
+    String = cell(1,9);
     String{1} = 'Magnetization, |Mxy| [M0]';
-    String{2} = 'Magnetization, Mx [M0]';
-    String{3} = 'Magnetization, My [M0]';
-    String{4} = 'Magnetization, Mz [M0]';
-    String{5} = 'Desired Magnetization, |Mxy| [M0]';
-    String{6} = 'Desired Magnetization, Mx [M0]';
-    String{7} = 'Desired Magnetization, My [M0]';
-    String{8} = 'Desired Magnetization, Mz [M0]';
+    String{2} = 'Magnetization, arg(Mxy) [rad]';
     
-else
-    String = cell(1,8);
-    String{1} = 'Magnetization, |Mxy| [M0]';
-    String{2} = 'Magnetization, Mx [M0]';
-    String{3} = 'Magnetization, My [M0]';
-    String{4} = 'Magnetization, Mz [M0]';
-    String{5} = 'Desired Magnetization, |Mxy| [M0]';
-    String{6} = 'Desired Magnetization, Mx [M0]';
-    String{7} = 'Desired Magnetization, My [M0]';
-    String{8} = 'Desired Magnetization, Mz [M0]';
-end
-set(hsim.popupmenu1, 'String', String);
-set(hsim.popupmenu1, 'Value',1);
+    String{3} = 'Magnetization, Mx [M0]';
+    String{4} = 'Magnetization, My [M0]';
+    String{5} = 'Magnetization, Mz [M0]';
+    
+    String{6} = 'Desired Magnetization, |Mxy| [M0]';
+    String{7} = 'Desired Magnetization, Mx [M0]';
+    String{8} = 'Desired Magnetization, My [M0]';
+    String{9} = 'Desired Magnetization, Mz [M0]';
+
+set(hsim.popupmenu_Magn, 'String', String);
+set(hsim.popupmenu_Magn, 'Value',1);
+
+%%
+
+String = cell(1,14);
+String{1} = 'RF Pulse Amplitude [rad/s]';
+String{2} = 'RF Pulse Phase [rad]';
+String{3} = 'RF Pulse Real [rad/s]';
+String{4} = 'RF Pulse Imaginary [rad/s]';
+String{5} = 'Gradient x [T/m]';
+String{6} = 'Gradient y [T/m]';
+String{7} = 'Gradient z [T/m]';
+String{8} = 'Gradient x, y, and z [T/m]';
+String{9} = 'RF Pulse Amplitude & Gradients x,y, and z';
+String{10} = 'kx [1/m]';
+String{11} = 'ky [1/m]';
+String{12} = 'kz [1/m]';
+String{13} = 'kx, ky, and kz [1/m]';
+String{14} = 'RF Pulse Amplitude & kx, ky, and kz ';
+
+set(hsim.popupmenu_Pulse, 'String', String);
+set(hsim.popupmenu_Pulse, 'Value',1);
 %%
 [hsim.colmap.Jet,hsim.colmap.Gray] = GetColormaps;
 
@@ -1019,82 +1064,84 @@ hsim = Plotting(hsim);
 fig = hsim.fig;
 end
 
-function popupmenu1_Callback(hOb, ed)
+function popupmenu_Magn_Callback(hOb, ed)
 global hsim
-hsim.popupmenu1select = get(hsim.popupmenu1,'Value');
+hsim.popupmenu_Magnselect = get(hsim.popupmenu_Magn,'Value');
+hsim = Plotting(hsim);
+end
+
+function popupmenu_Pulse_Callback(hOb, ed)
+global hsim
+
+hsim.popupmenu_Pulseselect = get(hsim.popupmenu_Pulse,'Value');
 hsim = Plotting(hsim);
 end
 
 function listbox1_Callback(hOb, ed)
 end
 
-function listbox2_Callback(hOb, ed)
-end
 
-function listbox3_Callback(hOb, ed)
-end
-
-function slider1_Callback(hOb, ed)
+function slider_n_Callback(hOb, ed)
 global hsim
 hsim.nNo = round(get(hOb, 'Value'));
 set(hOb, 'Value',hsim.nNo);
 
-set(hsim.slider1,'Visible','on','Value',hsim.nNo)
-set(hsim.text1,'Visible','on','String',sprintf('Timeframe %i dt (%1.1e s) of %i dt (%1.1e s)',hsim.nNo,hsim.nNo*hsim.sim.dt,hsim.sim.N,hsim.sim.N.*hsim.sim.dt))
+set(hsim.slider_n,'Visible','on','Value',hsim.nNo)
+set(hsim.text_n,'Visible','on','String',sprintf('Timeframe %i dt (%1.1e s) of %i dt (%1.1e s)',hsim.nNo,hsim.nNo*hsim.sim.dt,hsim.sim.N,hsim.sim.N.*hsim.sim.dt))
 hsim = Plotting(hsim);
 end
 
-function slider2_Callback(hOb, ed)
+function slider_Sl_Callback(hOb, ed)
 global hsim
 hsim.SlNo = round(get(hOb, 'Value'));
 % hsim.SlNo
-set(hsim.text4,'String',sprintf('Slice %i of %i',hsim.SlNo,hsim.sim.R(3)))
+set(hsim.text_Sl,'String',sprintf('Slice %i of %i',hsim.SlNo,hsim.sim.R(3)))
 hsim = Plotting(hsim);
 end
 
-function slider3_Callback(hOb, ed)
+function slider_Tx_Callback(hOb, ed)
 global hsim
 hsim.pTxNo = round(get(hOb, 'Value'));
-
+hsim.pTxNo
 if hsim.pTxNo == hsim.sim.pTx+1
-    set(hsim.text3,'Visible','on','String',sprintf('All %i Tx',hsim.sim.pTx))
+    set(hsim.text_Tx,'Visible','on','String',sprintf('All %i Tx',hsim.sim.pTx))
 else
-    set(hsim.text3,'Visible','on','String',sprintf('Tx %i of %i',hsim.pTxNo,hsim.sim.pTx))
+    set(hsim.text_Tx,'Visible','on','String',sprintf('Tx %i of %i',hsim.pTxNo,hsim.sim.pTx))
 end
 
 hsim = Plotting(hsim);
 end
 
-function slider4_Callback(hOb, ed)
+function slider_freq_Callback(hOb, ed)
 global hsim
 hsim.freqNo = round(get(hOb, 'Value'));
 set(hOb, 'Value',hsim.freqNo);
-set(hsim.text6,'Visible','on','String',sprintf('Frequency: %.2f [Hz]',hsim.freq(hsim.freqNo)))
+set(hsim.text_freq,'Visible','on','String',sprintf('Frequency: %.2f [Hz]',hsim.freq(hsim.freqNo)))
 hsim = Plotting(hsim);
 end
 
-function slider5_Callback(hOb, ed)
+function slider_k_Callback(hOb, ed)
 global hsim
 hsim.kNo = round(get(hOb, 'Value'));
 set(hOb, 'Value',hsim.kNo);
-set(hsim.text7,'Visible','on','String',sprintf('Iteration %i of %i',hsim.kNo-1,hsim.sim.K-1))
+set(hsim.text_k,'Visible','on','String',sprintf('Iteration %i of %i',hsim.kNo-1,hsim.sim.K-1))
 hsim = Plotting(hsim);
 end
 
-function slider6_Callback(hOb, ed)
+function slider_B1_Callback(hOb, ed)
 global hsim
 hsim.nB1inh = round(get(hOb, 'Value'));
 set(hOb, 'Value',hsim.nB1inh);
-set(hsim.text8,'Visible','on','String',sprintf('B1 scale %i of %i (%1.1e %%)',hsim.nB1inh,hsim.sim.B1inhom_N,hsim.sim.B1inhom_scales(hsim.nB1inh)))
+set(hsim.text_B1,'Visible','on','String',sprintf('B1 scale %i of %i (%1.1e %%)',hsim.nB1inh,hsim.sim.B1inhom_N,hsim.sim.B1inhom_scales(hsim.nB1inh)))
 
 hsim = Plotting(hsim);
 end
 
-function slider7_Callback(hOb, ed)
+function slider_B0_Callback(hOb, ed)
 global hsim
 hsim.nB0inh = round(get(hOb, 'Value'));
 set(hOb, 'Value',hsim.nB0inh);
-set(hsim.text9,'Visible','on','String',sprintf('B0 offset %i of %i (%1.1e Hz)',hsim.nB0inh,hsim.sim.B0inhom_N,hsim.sim.B0inhom_offsets(hsim.nB0inh)))
+set(hsim.text_B0,'Visible','on','String',sprintf('B0 offset %i of %i (%1.1e Hz)',hsim.nB0inh,hsim.sim.B0inhom_N,hsim.sim.B0inhom_offsets(hsim.nB0inh)))
 
 hsim = Plotting(hsim);
 end
@@ -1250,42 +1297,42 @@ Gray(:,:,2) = repmat(grayy(:,2),[1,10,1]);
 Gray(:,:,3) = repmat(grayy(:,3),[1,10,1]);
 end
 
-function pushbutton1_Callback(hOb, ed)
+function pushbutton_playx1_Callback(hOb, ed)
 global hsim
 for n = 1:hsim.sim.N
     hsim.nNo = n;
-    set(hsim.slider1,'Value',hsim.nNo)
-    set(hsim.text3,'String',sprintf('Timeframe %i dt (%1.1e s) of %i dt (%1.1e s)',hsim.nNo,hsim.nNo*hsim.sim.dt,hsim.sim.N,hsim.sim.N.*hsim.sim.dt))
+    set(hsim.slider_n,'Value',hsim.nNo)
+    set(hsim.text_n,'String',sprintf('Timeframe %i dt (%1.1e s) of %i dt (%1.1e s)',hsim.nNo,hsim.nNo*hsim.sim.dt,hsim.sim.N,hsim.sim.N.*hsim.sim.dt))
     hsim = Plotting(hsim);
     pause(0.05)
     drawnow
 end
 end
 
-function pushbutton2_Callback(hOb, ed)
+function pushbutton_playx10_Callback(hOb, ed)
 global hsim
 
 n_ = round(linspace(1,hsim.sim.N,hsim.sim.N/10));
 
 for n = n_;
     hsim.nNo = n;
-    set(hsim.slider1,'Value',hsim.nNo)
-    set(hsim.text3,'String',sprintf('Timeframe %i dt (%1.1e s) of %i dt (%1.1e s)',hsim.nNo,hsim.nNo*hsim.sim.dt,hsim.sim.N,hsim.sim.N.*hsim.sim.dt))
+    set(hsim.slider_n,'Value',hsim.nNo)
+    set(hsim.text_n,'String',sprintf('Timeframe %i dt (%1.1e s) of %i dt (%1.1e s)',hsim.nNo,hsim.nNo*hsim.sim.dt,hsim.sim.N,hsim.sim.N.*hsim.sim.dt))
     hsim = Plotting(hsim);
     pause(0.05)
     drawnow
 end
 end
 
-function pushbutton3_Callback(hOb, ed)
+function pushbutton_playx100_Callback(hOb, ed)
 global hsim
 
 n_ = round(linspace(1,hsim.sim.N,hsim.sim.N/100));
 
 for n = n_;
     hsim.nNo = n;
-    set(hsim.slider1,'Value',hsim.nNo)
-    set(hsim.text3,'String',sprintf('Timeframe %i dt (%1.1e s) of %i dt (%1.1e s)',hsim.nNo,hsim.nNo*hsim.sim.dt,hsim.sim.N,hsim.sim.N.*hsim.sim.dt))
+    set(hsim.slider_n,'Value',hsim.nNo)
+    set(hsim.text_n,'String',sprintf('Timeframe %i dt (%1.1e s) of %i dt (%1.1e s)',hsim.nNo,hsim.nNo*hsim.sim.dt,hsim.sim.N,hsim.sim.N.*hsim.sim.dt))
     hsim = Plotting(hsim);
     pause(0.05)
     drawnow
@@ -1296,8 +1343,26 @@ function hsim = what2plot(hsim)
 % tic
 M_t = blOCh__spc('list2grid',[],[],[],[],hsim.sim.M_t(:,hsim.nNo,hsim.kNo,hsim.pTxNo,hsim.nB1inh,hsim.nB0inh),[hsim.sim.R,hsim.sim.Rv],hsim.sim.idxtot,3);
 Md = blOCh__spc('list2grid',[],[],[],[],hsim.sim.Md,[hsim.sim.R,hsim.sim.Rv],hsim.sim.idxtot,3);
+Mx_max = max(max(hsim.sim.M_t(1:3:end,:)));
+Mx_min = min(min(hsim.sim.M_t(1:3:end,:)));
+My_max = max(max(hsim.sim.M_t(2:3:end,:)));
+My_min = min(min(hsim.sim.M_t(2:3:end,:)));
+Mz_max = max(max(hsim.sim.M_t(3:3:end,:)));
+Mz_min = min(min(hsim.sim.M_t(3:3:end,:)));
+Mxy_max = max(max(abs(complex(hsim.sim.M_t(1:3:end,:),hsim.sim.M_t(2:3:end,:)))));
+Mxy_min = 0;
+
+Mdx_max = max(max(hsim.sim.Md(1:3:end,:)));
+Mdx_min = min(min(hsim.sim.Md(1:3:end,:)));
+Mdy_max = max(max(hsim.sim.Md(2:3:end,:)));
+Mdy_min = min(min(hsim.sim.Md(2:3:end,:)));
+Mdz_max = max(max(hsim.sim.Md(3:3:end,:)));
+Mdz_min = min(min(hsim.sim.Md(3:3:end,:)));
+Mdxy_max = max(max(abs(complex(hsim.sim.Md(1:3:end,:),hsim.sim.Md(2:3:end,:)))));
+Mdxy_min = 0;
+
 % toc
-switch get(hsim.popupmenu1,'Value')
+switch get(hsim.popupmenu_Magn,'Value')
     
     case 1
         
@@ -1306,202 +1371,535 @@ switch get(hsim.popupmenu1,'Value')
         ordinate = abs(complex(M_t(:,:,:,:,1),M_t(:,:,:,:,2)));
         
         
-        hsim.ordinate_mn = 0;
-        hsim.ordinate_mx = max( ordinate(:));
+        hsim.axm.ordinate_mn = Mxy_min;
+        hsim.axm.ordinate_mx = Mxy_max;
         %       'Desired Magnetization, |Mxy| [M0]';
     case 2
+        ordinate = angle(complex(M_t(:,:,:,:,1),M_t(:,:,:,:,2)));
+        
+        
+        hsim.axm.ordinate_mn = -pi;
+        hsim.axm.ordinate_mx = pi;
+        %       'Desired Magnetization, arg(Mxy) [M0]';
+    case 3
         %       'Desired Magnetization, Mx [M0]';
         ordinate = M_t(:,:,:,:,1);
         
-        hsim.ordinate_mn = min( ordinate(:));
-        hsim.ordinate_mx = max( ordinate(:));
-    case 3
+        hsim.axm.ordinate_mn = Mx_min;
+        hsim.axm.ordinate_mx = Mx_max;
+    case 4
         %       'Desired Magnetization, My [M0]';
         ordinate = M_t(:,:,:,:,2);
-        hsim.ordinate_mn = min( ordinate(:));
-        hsim.ordinate_mx = max( ordinate(:));
-    case 4
+        hsim.axm.ordinate_mn = My_min;
+        hsim.axm.ordinate_mx = My_max;
+    case 5
         %       'Desired Magnetization, Mz [M0]';
         ordinate = M_t(:,:,:,:,3);
-        hsim.ordinate_mn = min( ordinate(:));
-        hsim.ordinate_mx = max( ordinate(:));
-    case 5
+        hsim.axm.ordinate_mn = Mz_min;
+        hsim.axm.ordinate_mx = Mz_max;
+    case 6
         
         
         ordinate = abs(complex(Md(:,:,:,:,1),Md(:,:,:,:,2)));
         
         
-        hsim.ordinate_mn = 0;
-        hsim.ordinate_mx = max( ordinate(:));
+        hsim.axm.ordinate_mn = Mdxy_min;
+        hsim.axm.ordinate_mx = Mdxy_max;
         %       'Desired Magnetization, |Mxy| [M0]';
-    case 6
+    case 7
         %       'Desired Magnetization, Mx [M0]';
         ordinate = Md(:,:,:,:,1);
         
-        hsim.ordinate_mn = min( ordinate(:));
-        hsim.ordinate_mx = max( ordinate(:));
-    case 7
+        hsim.axm.ordinate_mn = Mdx_min;
+        hsim.axm.ordinate_mx = Mdx_max;
+    case 8
         %       'Desired Magnetization, My [M0]';
         ordinate = Md(:,:,:,:,2);
-        hsim.ordinate_mn = min( ordinate(:));
-        hsim.ordinate_mx = max( ordinate(:));
-    case 8
+       hsim.axm.ordinate_mn = Mdy_min;
+        hsim.axm.ordinate_mx = Mdy_max;
+    case 9
         %       'Desired Magnetization, Mz [M0]';
         ordinate = Md(:,:,:,:,3);
-        hsim.ordinate_mn = min( ordinate(:));
-        hsim.ordinate_mx = max( ordinate(:));
+        hsim.axm.ordinate_mn = Mdz_min;
+        hsim.axm.ordinate_mx = Mdz_max;
 end
-if hsim.ordinate_mx == hsim.ordinate_mn
-    hsim.ordinate_mx = hsim.ordinate_mx + eps;
+if hsim.axm.ordinate_mx == hsim.axm.ordinate_mn
+    hsim.axm.ordinate_mx = hsim.axm.ordinate_mx + eps;
 end
-% hsim.ordinate = ordinate;
+% hsim.axm.ordinate = ordinate;
 
 switch hsim.sim.Dim
     
     case '1DSI'
-        hsim.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
         
-        hsim.Dim1axis = linspace(1,hsim.sim.R(3),5);
-        hsim.Dim2label = ' z [m]';
-        hsim.ordinate = squeeze(ordinate);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+        hsim.axm.Dim1label = ' z [m]';
+        hsim.axm.ordinate = squeeze(ordinate);
+        
+        
+        
+        
     case '1DAP'
-        hsim.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.Dim1axis = linspace(1,hsim.sim.R(2),5);
-        hsim.Dim2label = ' y [m]';
-        hsim.ordinate = squeeze(ordinate);
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+        hsim.axm.Dim1label = ' y [m]';
+        hsim.axm.ordinate = squeeze(ordinate);
     case '1DRL'
-        hsim.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.Dim1axis = linspace(1,hsim.sim.R(1),5);
-        hsim.Dim2label = ' x [m]';
-        hsim.ordinate = squeeze(ordinate);
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+        hsim.axm.Dim1label = ' x [m]';
+        hsim.axm.ordinate = squeeze(ordinate);
     case '1+1DSI'
-        hsim.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
-        hsim.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
-        hsim.Dim1axis = linspace(1,hsim.sim.R(3),5);
-        hsim.Dim2axis = linspace(1,hsim.sim.Rv,5);
-        hsim.Dim1label = ' z [m]';
-        hsim.Dim2label = ' v [Hz]';
-        hsim.ordinate = squeeze(ordinate);
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+        hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+        hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+        hsim.axm.Dim1label = ' z [m]';
+        hsim.axm.Dim2label = ' v [Hz]';
+        hsim.axm.ordinate = squeeze(ordinate);
     case '1+1DAP'
-        hsim.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
-        hsim.Dim1axis = linspace(1,hsim.sim.R(2),5);
-        hsim.Dim2axis = linspace(1,hsim.sim.Rv,5);
-        hsim.Dim1label = ' y [m]';
-        hsim.Dim2label = ' v [Hz]';
-        hsim.ordinate = squeeze(ordinate);
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+        hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+        hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+        hsim.axm.Dim1label = ' y [m]';
+        hsim.axm.Dim2label = ' v [Hz]';
+        hsim.axm.ordinate = squeeze(ordinate);
     case '1+1DRL'
-        hsim.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
-        hsim.Dim1axis = linspace(1,hsim.sim.R(1),5);
-        hsim.Dim2axis = linspace(1,hsim.sim.Rv,5);
-        hsim.Dim1label = ' x [m]';
-        hsim.Dim2label = ' v [Hz]';
-        hsim.ordinate = squeeze(ordinate);
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+        hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+        hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+        hsim.axm.Dim1label = ' x [m]';
+        hsim.axm.Dim2label = ' v [Hz]';
+        hsim.axm.ordinate = squeeze(ordinate);
     case '2DAx'
-        hsim.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.Dim2axis = linspace(1,hsim.sim.R(1),5);
-        hsim.Dim1axis = linspace(1,hsim.sim.R(2),5);
-        hsim.Dim1label = ' y [m]';
-        hsim.Dim2label = ' x [m]';
-        hsim.ordinate = squeeze(ordinate);
+        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+        hsim.axm.Dim1label = ' y [m]';
+        hsim.axm.Dim2label = ' x [m]';
+        hsim.axm.ordinate = squeeze(ordinate);
     case '2DCo'
-        hsim.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
-        hsim.Dim2axis = linspace(1,hsim.sim.R(1),5);
-        hsim.Dim1axis = linspace(1,hsim.sim.R(3),5);
+        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
         
-        hsim.Dim2label = ' x [m]';
-        hsim.Dim1label = ' z [m]';
-        hsim.ordinate = squeeze(ordinate);
+        hsim.axm.Dim2label = ' x [m]';
+        hsim.axm.Dim1label = ' z [m]';
+        hsim.axm.ordinate = squeeze(ordinate);
     case '2DSa'
-        hsim.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.Dim2ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
-        hsim.Dim1axis = linspace(1,hsim.sim.R(2),5);
-        hsim.Dim2axis = linspace(1,hsim.sim.R(3),5);
-        hsim.Dim2label = ' y [m]';
-        hsim.Dim1label = ' z [m]';
-        hsim.ordinate = squeeze(ordinate);
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(3),5);
+        hsim.axm.Dim2label = ' y [m]';
+        hsim.axm.Dim1label = ' z [m]';
+        hsim.axm.ordinate = squeeze(ordinate);
     case '2+1DAx'
-        hsim.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.Dim1axis = linspace(1,hsim.sim.R(1),5);
-        hsim.Dim2axis = linspace(1,hsim.sim.R(2),5);
-        hsim.Dim2label = ' x [m]';
-        hsim.Dim1label = ' y [m]';
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
+        hsim.axm.Dim2label = ' x [m]';
+        hsim.axm.Dim1label = ' y [m]';
         
-        hsim.ordinate = squeeze(ordinate(:,:,:,hsim.freqNo));
+        hsim.axm.ordinate = squeeze(ordinate(:,:,:,hsim.freqNo));
     case '2+1DCo'
-        hsim.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
-        hsim.Dim2axis = linspace(1,hsim.sim.R(1),5);
-        hsim.Dim1axis = linspace(1,hsim.sim.R(3),5);
+        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
         
-        hsim.Dim2label = ' x [m]';
-        hsim.Dim1label = ' z [m]';
-        hsim.ordinate = squeeze(ordinate(:,:,:,hsim.freqNo));
+        hsim.axm.Dim2label = ' x [m]';
+        hsim.axm.Dim1label = ' z [m]';
+        hsim.axm.ordinate = squeeze(ordinate(:,:,:,hsim.freqNo));
     case '2+1DSa'
-        hsim.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.Dim2ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
-        hsim.Dim1axis = linspace(1,hsim.sim.R(2),5);
-        hsim.Dim2axis = linspace(1,hsim.sim.R(3),5);
-        hsim.Dim2label = ' y [m]';
-        hsim.Dim1label = ' z [m]';
-        hsim.ordinate = squeeze(ordinate(:,:,:,hsim.freqNo));
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(3),5);
+        hsim.axm.Dim2label = ' y [m]';
+        hsim.axm.Dim1label = ' z [m]';
+        hsim.axm.ordinate = squeeze(ordinate(:,:,:,hsim.freqNo));
     case '3D'
-        hsim.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.Dim1axis = linspace(1,hsim.sim.R(1),5);
-        hsim.Dim2axis = linspace(1,hsim.sim.R(2),5);
-        hsim.Dim2label = ' x [m]';
-        hsim.Dim1label = ' y [m]';
-        hsim.ordinate = squeeze(ordinate(:,:,hsim.SlNo,1));
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
+        hsim.axm.Dim2label = ' x [m]';
+        hsim.axm.Dim1label = ' y [m]';
+        hsim.axm.ordinate = squeeze(ordinate(:,:,hsim.SlNo,1));
     case '3+1D'
-        hsim.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.Dim1axis = linspace(1,hsim.sim.R(1),5);
-        hsim.Dim2axis = linspace(1,hsim.sim.R(2),5);
-        hsim.Dim2label = ' x [m]';
-        hsim.Dim1label = ' y [m]';
-        hsim.ordinate = squeeze(ordinate(:,:,hsim.SlNo,hsim.freqNo));
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
+        hsim.axm.Dim2label = ' x [m]';
+        hsim.axm.Dim1label = ' y [m]';
+        hsim.axm.ordinate = squeeze(ordinate(:,:,hsim.SlNo,hsim.freqNo));
     case '0+1D'
-        hsim.Dim1ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
-        hsim.Dim1axis = linspace(1,hsim.sim.Rv,5);
-        hsim.Dim1label = ' v [Hz]';
-        hsim.ordinate = squeeze(ordinate);
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.Rv,5);
+        hsim.axm.Dim1label = ' v [Hz]';
+        hsim.axm.ordinate = squeeze(ordinate);
 end
+switch get(hsim.popupmenu_Pulse,'Value')
+
+    case 1
+        if hsim.pTxNo == hsim.sim.pTx+1
+            temp = winter(hsim.sim.pTx);
+            hsim.axp.colorpulse = temp;
+        else
+            temp = winter(hsim.sim.pTx);
+            hsim.axp.colorpulse = temp(hsim.pTxNo,:);
+        end
+        if hsim.pTxNo == hsim.sim.pTx+1
+            hsim.axp.ordinate = abs(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo))).';
+            
+        else
+            hsim.axp.ordinate = abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo))).';
+            
+        end
+        Mx = max(hsim.axp.ordinate(:))+eps;
+        hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2ticklabel = linspace(0,Mx,3);
+        hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2axis = linspace(1,Mx,3);
+        hsim.axp.Dim2label = ' |\omega| [rad/s]';
+        hsim.axp.Dim1label = ' Time frame [#]';
+        
+    case 2
+        if hsim.pTxNo == hsim.sim.pTx+1
+            temp = winter(hsim.sim.pTx);
+            hsim.axp.colorpulse = temp;
+        else
+            temp = winter(hsim.sim.pTx);
+            hsim.axp.colorpulse = temp(hsim.pTxNo,:);
+        end
+        if hsim.pTxNo == hsim.sim.pTx+1
+            hsim.axp.ordinate = angle(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo))).';
+        else
+            hsim.axp.ordinate = angle(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo))).';
+        end
+        
+        hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2ticklabel = {'-pi','0','pi'};
+        hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2axis = linspace(-pi,pi,3);
+        hsim.axp.Dim2label = ' \angle\omega [rad]';
+        hsim.axp.Dim1label = ' Time frame [#]';
+        
+        
+    case 3
+        if hsim.pTxNo == hsim.sim.pTx+1
+            temp = winter(hsim.sim.pTx);
+            hsim.axp.colorpulse = temp;
+        else
+            temp = winter(hsim.sim.pTx);
+            hsim.axp.colorpulse = temp(hsim.pTxNo,:);
+        end
+        if hsim.pTxNo == hsim.sim.pTx+1
+            hsim.axp.ordinate = real(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo))).';
+        else
+            hsim.axp.ordinate = real(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo))).';
+        end
+        Mn = min(hsim.axp.ordinate(:))-eps;
+        Mx = max(hsim.axp.ordinate(:))+eps;
+        hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2ticklabel = linspace(Mn,Mx,3);
+        hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2axis = linspace(Mn,Mx,3);
+        hsim.axp.Dim2label = ' Re(\omega) [rad/s]';
+        hsim.axp.Dim1label = ' Time frame [#]';
+        
+        
+    case 4
+        if hsim.pTxNo == hsim.sim.pTx+1
+            temp = winter(hsim.sim.pTx);
+            hsim.axp.colorpulse = temp;
+        else
+            temp = winter(hsim.sim.pTx);
+            hsim.axp.colorpulse = temp(hsim.pTxNo,:);
+        end
+        if hsim.pTxNo == hsim.sim.pTx+1
+            hsim.axp.ordinate = imag(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo))).';
+        else
+            hsim.axp.ordinate = imag(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo))).';
+        end
+        Mn = min(hsim.axp.ordinate(:))-eps;
+        Mx = max(hsim.axp.ordinate(:))+eps;
+        hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2ticklabel = linspace(Mn,Mx,3);
+        hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2axis = linspace(Mn,Mx,3);
+        hsim.axp.Dim2label = ' Im(\omega) [rad/s]';
+        hsim.axp.Dim1label = ' Time frame [#]';
+    case 5
+        temp = [0,0,0;0.2,0.2,0.2;0.4,0.4,0.4];
+        hsim.axp.colorpulse = temp(1,:);
+        hsim.axp.ordinate = 1e3.*hsim.sim.g(1,:).';
+        Mn = min(hsim.axp.ordinate(:))-eps;
+        Mx = max(hsim.axp.ordinate(:))+eps;
+        hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2ticklabel = linspace(Mn,Mx,3);
+        hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2axis = linspace(Mn,Mx,3);
+        hsim.axp.Dim2label = ' G_x [mT/m]';
+        hsim.axp.Dim1label = ' Time frame [#]';
+    case 6
+        temp = [0,0,0;0.2,0.2,0.2;0.4,0.4,0.4];
+        hsim.axp.colorpulse = temp(2,:);
+        hsim.axp.ordinate = 1e3.*hsim.sim.g(2,:).';
+        Mn = min(hsim.axp.ordinate(:))-eps;
+        Mx = max(hsim.axp.ordinate(:))+eps;
+        hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2ticklabel = linspace(Mn,Mx,3);
+        hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2axis = linspace(Mn,Mx,3);
+        hsim.axp.Dim2label = ' G_y [mT/m]';
+        hsim.axp.Dim1label = ' Time frame [#]';
+    case 7
+        temp = [0,0,0;0.2,0.2,0.2;0.4,0.4,0.4];
+        hsim.axp.colorpulse = temp(3,:);
+        hsim.axp.ordinate = 1e3.*hsim.sim.g(3,:).';
+        Mn = min(hsim.axp.ordinate(:))-eps;
+        Mx = max(hsim.axp.ordinate(:))+eps;
+        hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2ticklabel = linspace(Mn,Mx,3);
+        hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2axis = linspace(Mn,Mx,3);
+        hsim.axp.Dim2label = ' G_z [mT/m]';
+        hsim.axp.Dim1label = ' Time frame [#]';
+    case 8
+        tempc = [0,0,0;0.2,0.2,0.2;0.4,0.4,0.4];
+        
+        hsim.axp.colorpulse = tempc;
+        temp = [hsim.sim.g(1,:).',hsim.sim.g(2,:).',hsim.sim.g(3,:).'];
+        temp = temp./max(abs(temp(:)));
+        temp(:,2) = temp(:,2)+2.2;
+        temp(:,1) = temp(:,1)+4.2;
+        hsim.axp.ordinate = temp;
+%         Mn = min(hsim.axp.ordinate(:))-eps;
+%         Mx = max(hsim.axp.ordinate(:))+eps;
+        hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2ticklabel = {'G_z','G_y','G_x'};
+        hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2axis = [0,2.2,4.2];
+        hsim.axp.Dim2label = ' [arb.unit.]';
+        hsim.axp.Dim1label = ' Time frame [#]';
+    case 9
+        if hsim.pTxNo == hsim.sim.pTx+1
+            temp = winter(hsim.sim.pTx);
+        else
+            temp = winter(hsim.sim.pTx);
+           temp=  temp(hsim.pTxNo,:);
+        end
+        temp2 = [0,0,0;0.2,0.2,0.2;0.4,0.4,0.4];
+        hsim.axp.colorpulse = [temp2;temp];
+        
+        if hsim.pTxNo == hsim.sim.pTx+1
+            temprf = [abs(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo))).'./max(max(abs(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo)))))];
+            
+        else
+            temprf = [abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo))).'./max(max(abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo)))))];
+            
+        end
+        
+        tempg = [hsim.sim.g(1,:).',hsim.sim.g(2,:).',hsim.sim.g(3,:).']./max(abs(hsim.sim.g(:)));
+        tempg(:,2) = tempg(:,2)+2.2;
+        tempg(:,1) = tempg(:,1)+4.2;
+        
+        
+        hsim.axp.ordinate = [tempg,temprf+5.2];
+        
+        hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2ticklabel = {'G_z','G_y','G_x','|\omega|'};
+        hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2axis = [0,2.2,4.2,5.2];
+        hsim.axp.Dim2label = ' [arb.unit.]';
+        hsim.axp.Dim1label = ' Time frame [#]';
+        
+        
+   case 10
+        temp = [0,0,0;0.2,0.2,0.2;0.4,0.4,0.4];
+        hsim.axp.colorpulse = temp(1,:);
+        hsim.axp.ordinate = cumsum(hsim.sim.g(1,:).').*hsim.sim.dt*hsim.sim.gamma/2/pi - sum(hsim.sim.g(1,:).').*hsim.sim.dt*hsim.sim.gamma/2/pi;
+        
+        Mn = min(hsim.axp.ordinate(:))-eps;
+        Mx = max(hsim.axp.ordinate(:))+eps;
+        hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2ticklabel = linspace(Mn,Mx,3);
+        hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2axis = linspace(Mn,Mx,3);
+        hsim.axp.Dim2label = ' k_x [1/m]';
+        hsim.axp.Dim1label = ' Time frame [#]';
+        
+        
+    case 11
+        temp = [0,0,0;0.2,0.2,0.2;0.4,0.4,0.4];
+        hsim.axp.colorpulse = temp(2,:);
+        hsim.axp.ordinate = cumsum(hsim.sim.g(2,:).').*hsim.sim.dt*hsim.sim.gamma/2/pi - sum(hsim.sim.g(2,:).').*hsim.sim.dt*hsim.sim.gamma/2/pi;
+        
+        Mn = min(hsim.axp.ordinate(:))-eps;
+        Mx = max(hsim.axp.ordinate(:))+eps;
+        hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2ticklabel = linspace(Mn,Mx,3);
+        hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2axis = linspace(Mn,Mx,3);
+        hsim.axp.Dim2label = ' k_y [1/m]';
+        hsim.axp.Dim1label = ' Time frame [#]';
+    case 12
+        temp = [0,0,0;0.2,0.2,0.2;0.4,0.4,0.4];
+        hsim.axp.colorpulse = temp(3,:);
+        hsim.axp.ordinate = cumsum(hsim.sim.g(3,:).').*hsim.sim.dt*hsim.sim.gamma/2/pi - sum(hsim.sim.g(3,:).').*hsim.sim.dt*hsim.sim.gamma/2/pi;
+        
+        Mn = min(hsim.axp.ordinate(:))-eps;
+        Mx = max(hsim.axp.ordinate(:))+eps;
+        hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2ticklabel = linspace(Mn,Mx,3);
+        hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2axis = linspace(Mn,Mx,3);
+        hsim.axp.Dim2label = ' k_z [1/m]';
+        hsim.axp.Dim1label = ' Time frame [#]';
+        
+    case 13
+        temp = [0,0,0;0.2,0.2,0.2;0.4,0.4,0.4];
+        
+        hsim.axp.colorpulse = temp;
+%         temp = [hsim.sim.g(1,:).',hsim.sim.g(2,:).',hsim.sim.g(3,:).']./max(abs(hsim.sim.g(:)));
+        temp = cumsum([hsim.sim.g(1,:).',hsim.sim.g(2,:).',hsim.sim.g(3,:).']);
+        temp = temp./max(abs(temp(:)));
+        temp(:,2) = temp(:,2)+2.2;
+        temp(:,1) = temp(:,1)+4.2;
+        hsim.axp.ordinate = temp;
+        
+        hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2ticklabel = {'k_z','k_y','k_x'};
+        hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2axis = [0,2.2,4.2];
+        hsim.axp.Dim2label = ' [arb.unit.]';
+        hsim.axp.Dim1label = ' Time frame [#]';
+        
+    case 14
+        if hsim.pTxNo == hsim.sim.pTx+1
+            temp = winter(hsim.sim.pTx);
+        else
+            temp = winter(hsim.sim.pTx);
+           temp=  temp(hsim.pTxNo,:);
+        end
+        temp2 = [0,0,0;0.2,0.2,0.2;0.4,0.4,0.4];
+        hsim.axp.colorpulse = [temp2;temp];
+        
+        if hsim.pTxNo == hsim.sim.pTx+1
+            temprf = [abs(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo))).'./max(max(abs(complex(hsim.sim.uo(:,:,hsim.kNo),hsim.sim.vo(:,:,hsim.kNo)))))];
+            
+        else
+            temprf = [abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo))).'./max(max(abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kNo)))))];
+            
+        end
+        
+        tempg = cumsum([hsim.sim.g(1,:).',hsim.sim.g(2,:).',hsim.sim.g(3,:).'])-repmat(sum(hsim.sim.g,2).',[hsim.sim.N,1]);
+        tempg = tempg./max(abs(tempg(:)));
+        tempg(:,2) = tempg(:,2)+2.2;
+        tempg(:,1) = tempg(:,1)+4.2;
+        
+        
+        hsim.axp.ordinate = [tempg,temprf+5.2];
+        
+        hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2ticklabel = {'k_z','k_y','k_x','|\omega|'};
+        hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
+        hsim.axp.Dim2axis = [0,2.2,4.2,5.2];
+        hsim.axp.Dim2label = ' [arb.unit.]';
+        hsim.axp.Dim1label = ' Time frame [#]';
+end
+
+
 end
 
 function hsim=Plotting(hsim)
 
 hsim = what2plot(hsim);
 
-switch hsim.sim.Dim(1:2)
-    
-    case {'1D','0+'}
+
         
+        switch hsim.sim.Dim
+            case '1DSI'
+                axes(hsim.axes_Magn)
+                
+                plot(hsim.axm.ordinate,'linewidth',2)
+                axis([1,hsim.sim.R(3),hsim.axm.ordinate_mn,hsim.axm.ordinate_mx])
+                set(hsim.axes_Magn,'YTick',linspace(hsim.axm.ordinate_mn,hsim.axm.ordinate_mx,5))
+                set(hsim.axes_Magn,'XTickLabel',hsim.axm.Dim1ticklabel)
+                xlabel(hsim.axm.Dim1label)
+            case '1DAP'
+                axes(hsim.axes_Magn)
+                
+                plot(hsim.axm.ordinate,'linewidth',2)
+                axis([1,hsim.sim.R(2),hsim.axm.ordinate_mn,hsim.axm.ordinate_mx])
+                set(hsim.axes_Magn,'YTick',linspace(hsim.axm.ordinate_mn,hsim.axm.ordinate_mx,5))
+                set(hsim.axes_Magn,'XTickLabel',hsim.axm.Dim1ticklabel)
+                xlabel(hsim.axm.Dim1label)
+                
+            case '1DRL'
+                axes(hsim.axes_Magn)
+                
+                plot(hsim.axm.ordinate,'linewidth',2)
+                axis([1,hsim.sim.R(1),hsim.axm.ordinate_mn,hsim.axm.ordinate_mx])
+                set(hsim.axes_Magn,'YTick',linspace(hsim.axm.ordinate_mn,hsim.axm.ordinate_mx,5))
+                set(hsim.axes_Magn,'XTickLabel',hsim.axm.Dim1ticklabel)
+                xlabel(hsim.axm.Dim1label)
+                
         
-        axes(hsim.axes1)
-        
-        plot(hsim.ordinate)
-        set(hsim.axes1,'XTick',hsim.Dim1axis)
-        set(hsim.axes1,'XTickLabel',hsim.Dim1ticklabel)
-        xlabel(hsim.Dim1label)
-        
-    case {'1+','2D','2+','3D','3+'}
-        axes(hsim.axes1)
-        imagesc(hsim.ordinate,[hsim.ordinate_mn,hsim.ordinate_mx])
-        set(hsim.axes1,'XTick',hsim.Dim2axis,'YTick',hsim.Dim1axis)
-        set(hsim.axes1,'XTickLabel',hsim.Dim2ticklabel,'YTickLabel',hsim.Dim1ticklabel)
-        set(hsim.axes1,'Ydir','normal')
-        xlabel(hsim.Dim2label)
-        ylabel(hsim.Dim1label)
-        axes(hsim.axes2)
+    case {'1+1DSI','1+1DRL','1+1DAP','2DAx','2DCo','2DSa','2+1DAx','2+1DCo','2+1DSa','3D','3+1D'}
+        axes(hsim.axes_Magn)
+        imagesc(hsim.axm.ordinate,[hsim.axm.ordinate_mn,hsim.axm.ordinate_mx])
+        set(hsim.axes_Magn,'XTick',hsim.axm.Dim2axis,'YTick',hsim.axm.Dim1axis)
+        set(hsim.axes_Magn,'XTickLabel',hsim.axm.Dim2ticklabel,'YTickLabel',hsim.axm.Dim1ticklabel)
+        set(hsim.axes_Magn,'Ydir','normal')
+        xlabel(hsim.axm.Dim2label)
+        ylabel(hsim.axm.Dim1label)
+        axes(hsim.axes_Colorbar)
         imagesc(permute(hsim.Colmap,[1,2,3])), axis off
-        set(hsim.text1,'Visible','on','string',sprintf('%1.10f',hsim.ordinate_mn))
-        set(hsim.text2,'Visible','on','string',sprintf('%1.10f',hsim.ordinate_mx))
+        set(hsim.text1,'Visible','on','string',sprintf('%1.10f',hsim.axm.ordinate_mn))
+        set(hsim.text2,'Visible','on','string',sprintf('%1.10f',hsim.axm.ordinate_mx))
 end
+
+axes(hsim.axes_Pulse)
+for n = 1:size(hsim.axp.ordinate,2)
+    stairs(hsim.axp.ordinate(:,n),'color',hsim.axp.colorpulse(n,:),'linewidth',2)
+    hold on
+end
+hold on
+% val = max(abs(,abs(max(hsim.axp.ordinate(:))))
+
+switch get(hsim.popupmenu_Pulse,'Value')
+    case {8,13}
+        line([1,hsim.nNo],[0,0],'linewidth',1,'color','black')
+        line([1,hsim.nNo],[2.2,2.2],'linewidth',1,'color','black')
+        line([1,hsim.nNo],[4.2,4.2],'linewidth',1,'color','black')
+        case {9,14}
+        line([1,hsim.nNo],[0,0],'linewidth',1,'color','black')
+        line([1,hsim.nNo],[2.2,2.2],'linewidth',1,'color','black')
+        line([1,hsim.nNo],[4.2,4.2],'linewidth',1,'color','black')
+        line([1,hsim.nNo],[5.2,5.2],'linewidth',1,'color','black')
+end
+
+line([hsim.nNo,hsim.nNo],[min(hsim.axp.ordinate(:))-0.1*abs(min(hsim.axp.ordinate(:))),max(hsim.axp.ordinate(:))+0.1*abs(max(hsim.axp.ordinate(:)))],'linewidth',1,'color','red')
+hold off
+axis tight
+
+set(hsim.axes_Pulse,'XTick',(hsim.axp.Dim1axis),'YTick',hsim.axp.Dim2axis)
+        set(hsim.axes_Pulse,'XTickLabel',round(hsim.axp.Dim1ticklabel),'YTickLabel',hsim.axp.Dim2ticklabel)
+%         set(hsim.axes_Pulse,'Ydir','normal')
+        xlabel(hsim.axp.Dim1label)
+        ylabel(hsim.axp.Dim2label)
+
+
 end
 
 

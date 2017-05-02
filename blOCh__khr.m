@@ -1096,7 +1096,7 @@ try g = load(khr.Traj,'-ascii');
         
         ting.t = [0:ting.N-1].*ting.dt;
         
-        ting.k = ting.gamma.*cumtrapz(ting.t,ting.g,2).*ting.dt;
+        ting.k = ting.gamma.*cumtrapz(ting.t,ting.g,2).*ting.dt-sum(g,2).*ting.dt*ting.gamma;
 
         ting.s = diff([zeros(3,1),ting.g],1,2)./ting.dt;
 
@@ -1154,7 +1154,7 @@ N_tot = length(g);
 
 T_tot = N_tot*dt;
 
-k = cumsum(g)*dt*gammabar;
+k = cumsum(g)*dt*gammabar-sum(g,2).*dt*gamma;
 t = [0:dt:T_tot-dt];
 m = true(1,N_tot);
 
@@ -1182,7 +1182,7 @@ g(3,:) = ones(1,N)*GmHW*Gmpct/100;
 
 
 
-k = cumsum(g,2).*dt*gamma;
+k = cumsum(g,2).*dt*gamma-sum(g,2).*dt*gamma;
 
 ktot =k;
 gtot = g;
@@ -1202,7 +1202,7 @@ N = round(T/dt);
 
 g = ones(1,N)*Gsl;
 
-k = cumsum(g,2).*dt*gamma;
+k = cumsum(g,2).*dt*gamma-sum(g,2).*dt*gamma;
 s = zeros(1,N);
 m = true(1,N);
 
@@ -1226,7 +1226,7 @@ N = round(T/dt);
 
 g = [0,ones(1,N)*Gsl,-ones(1,round(N/2))*Gsl,0];
 
-k = cumsum(g,2).*dt*gamma;
+k = cumsum(g,2).*dt*gamma-sum(g,2).*dt*gamma;
 s = [0,diff(g)];
 m = false(size(g));
 m(g > 0) = true;
