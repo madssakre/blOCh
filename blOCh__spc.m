@@ -2543,9 +2543,10 @@ Dv_o = [c_BW-BW/2;c_BW+BW/2];
 [R_v,a_v,b_v] = find_R_and_idxs(Dv_i,Dv_o);
 
 Morph = [Dim_i,'_2_',Dim_o];
-
+Status = 1;
 switch Morph
     
+        
     case {'2+1DAx_2_2DAx','2+1DSa_2_2DSa','2+1DCo_2_2DCo'}
         D_i_intp1 = D_i;
         R_i_intp1 = R_i;
@@ -4100,10 +4101,10 @@ switch Morph
         Expand = 0;
         
     otherwise
-        
+        Status = 0;
 end
 
-
+if Status
 %% Do first interpolation
 if strcmp(Dim_i,'2DAx') && strcmp(Dim_o,'2+1DAx')
     d = 0;
@@ -4122,7 +4123,9 @@ O = Expand_Spectral(O,Expand,Rv_o);
 % tic
 [O,Xi,Yi,Zi,Vi] = Interp(Dim_o,O,D_i_intp2,R_i_intp2,Dv_i_intp2,Rv_i_intp2,D_o_intp2,R_o_intp2,Dv_o_intp2,Rv_o_intp2);
 % toc
-
+else
+    error('Morph: currently doesn''t support %s as a choice',Morph)
+end
 
 end
 

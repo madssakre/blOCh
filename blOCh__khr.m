@@ -14,17 +14,17 @@ function varargout = blOCh__khr(Fun,spc,Traj,Par,varargin)
 %
 %
 %     Copyright (C) 2017  Mads Sloth Vinding
-% 
+%
 %     This program is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 %     This program is distributed in the hope that it will be useful,
 %     but WITHOUT ANY WARRANTY; without even the implied warranty of
 %     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 %     GNU General Public License for more details.
-% 
+%
 %     You should have received a copy of the GNU General Public License
 %     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %
@@ -48,10 +48,10 @@ if isempty(Fun)
     
     if khr.Status
         khr.Status = 0;
-
-    valid_Trajs   = {'none4spect','none4spect2','1Dplat','1Dsl','1Dslref','2Dspii','2Dspio','1+1DTrapOsc','Random'};
         
-
+        valid_Trajs   = {'none4spect','none4spect2','1Dplat','1Dsl','1Dslref','2Dspii','2Dspio','1+1DTrapOsc','Random'};
+        
+        
         
         
         % SYS: Put the name of the system into this cell array
@@ -159,7 +159,7 @@ if isempty(Fun)
                                                                 try p.addParamValue('dt',default_dt,@(x)validateattributes(x,{'numeric'},{'size',[1,1],'real','>',0,'finite'}));
                                                                     try p.addParamValue('Show',default_Show,@(x)validateattributes(x,{'numeric'},{'size',[1,1],'real','integer','nonnegative'}));
                                                                         try p.addParamValue('MaskOnly',default_MaskOnly,@(x)any(valid_MaskOnlys));
-                                                                            catch me;Msg = ['blOCh__khr: ',me.message];end
+                                                                        catch me;Msg = ['blOCh__khr: ',me.message];end
                                                                     catch me;Msg = ['blOCh__khr: ',me.message];end
                                                                 catch me;Msg = ['blOCh__khr: ',me.message];end
                                                             catch  me;Msg = ['blOCh__khr: ',me.message];end
@@ -253,98 +253,104 @@ if isempty(Fun)
             
         end
         khr.Par = p.Results.Par;
-        switch GoTo 
+        switch GoTo
             
             case {1,2}
-           idx = find(strcmpi(p.Results.Sys,valid_Systems));
-            
-            khr.L = p.Results.L;
-            khr.R = p.Results.R;
-            khr.Rv = p.Results.Rv;
-            
-            khr.GmHW = actual_GmHW(idx);
-            khr.SmHW = actual_SmHW(idx);
-            khr.RFmHW = actual_RFmHW(idx);
-            khr.Gmpct = p.Results.Gmpct;
-            khr.Smpct = p.Results.Smpct;
-            khr.Nuc = p.Results.Nuc;
-            khr.Sys = p.Results.Sys;
-            
-            khr.dt = p.Results.dt;
-            
-            % SYS: if you need another nuclei input the gyromagnetic ratio here
-            % accordingly.
-            
-            switch khr.Nuc
-                case '1H'
-                    khr.gamma = 26.7522128e7;
-                case '13C'
-                    khr.gamma = 6.7282840e7;
-                case '19F'
-                    khr.gamma = 25.1814800e7;
-            end
-            khr.gammabar = khr.gamma/2/pi;
-                    % IMP: Go to this script and change accordingly
+                idx = find(strcmpi(p.Results.Sys,valid_Systems));
+                
+                khr.L = p.Results.L;
+                khr.R = p.Results.R;
+                khr.Rv = p.Results.Rv;
+                
+                khr.GmHW = actual_GmHW(idx);
+                khr.SmHW = actual_SmHW(idx);
+                khr.RFmHW = actual_RFmHW(idx);
+                khr.Gmpct = p.Results.Gmpct;
+                khr.Smpct = p.Results.Smpct;
+                khr.Nuc = p.Results.Nuc;
+                khr.Sys = p.Results.Sys;
+                
+                khr.dt = p.Results.dt;
+                
+                % SYS: if you need another nuclei input the gyromagnetic ratio here
+                % accordingly.
+                
+                switch khr.Nuc
+                    case '1H'
+                        khr.gamma = 26.7522128e7;
+                    case '13C'
+                        khr.gamma = 6.7282840e7;
+                    case '19F'
+                        khr.gamma = 25.1814800e7;
+                end
+                khr.gammabar = khr.gamma/2/pi;
+                
+                switch khr.Traj
+                
+                case 'Random'
+                    Par.Gipct     = 10;
+                case 'spokes'
                     
-                    [temp,Msg] = Make_khr(spc,khr);
-
-            
+                case '1+1DTrapOsc'
+                    Par.TBW = 8;
+                    Par.T = 3.2e-3;
+                case {'1Dsl','1Dslref'}
+                    Par.TBW = 8;
+                    Par.T = 3.2e-3;
+                case '2DrandT'
+                    Par.TBW = 8;
+                    Par.T = 3.2e-3;
+                    
+                    
+                    
+                    
+                    
+                case '3Dsphstckvdspii'
+                    Par.Lvd = [max(spc.L(1:2)),max(spc.L(1:2))];
+                    Par.rvd = [0.33 0.67];
+                case '3Dstckspi_rep'
+                    Par.Rv = ceil(spc.Rv./2);
+                    
+                    
+                otherwise
+                    Par = struct;
+            end
+                
+                khr.Par = Get_NewPar(khr.Par,Par);
+                % IMP: Go to this script and change accordingly
+                
+                
+              
+                [temp,Msg] = Make_khr(spc,khr);
+                
+                
             case 3
                 [temp,Msg] = Load_mat_khr(khr);
             case 4
-            khr.Nuc = p.Results.Nuc;
-                    khr.Sys = p.Results.Sys;
-                    
-                    khr.dt = p.Results.dt;
-                    
-                    [temp,Msg] = Load_ascii_khr(khr);
+                khr.Nuc = p.Results.Nuc;
+                khr.Sys = p.Results.Sys;
+                
+                khr.dt = p.Results.dt;
+                
+                [temp,Msg] = Load_ascii_khr(khr);
         end
-
-           if 0 
+        
+        if 0
             
-                % IMP: Make a case for your trajectory. In that case make a
-                % default par-struct. You assign special parameters to the
-                % input struct Par, and all variables not given in this struct will be
-                % read from the default par-struct.
-                
-                switch khr.Traj
-                    
-                    case 'Random'
-                        Par.Gipct     = 10;
-                    case 'spokes'
-                        
-                    case '1+1DTrapOsc'
-                        Par.TBW = 8;
-                        Par.T = 3.2e-3;
-                    case {'1Dsl','1Dslref'}
-                        Par.TBW = 8;
-                        Par.T = 3.2e-3;
-                    case '2DrandT'
-                        Par.TBW = 8;
-                        Par.T = 3.2e-3;
-                        
-                        
-                        
-                        
-                        
-                    case '3Dsphstckvdspii'
-                        Par.Lvd = [max(spc.L(1:2)),max(spc.L(1:2))];
-                        Par.rvd = [0.33 0.67];
-                    case '3Dstckspi_rep'
-                        Par.Rv = ceil(spc.Rv./2);
-
-             
-                    otherwise
-                        Par = [];
-                end
-                
-                
-                % IMP: Here you can add a special validation function in a
-                % case. Otherwise parameters to go on will simply those of
-                % khr.Par. And if any missing the default will be loaded. From
-                % this point on, any errors associated with ill parameters,
-                % say, wrong array types etc. is in your hands.
-
+            % IMP: Make a case for your trajectory. In that case make a
+            % default par-struct. You assign special parameters to the
+            % input struct Par, and all variables not given in this struct will be
+            % read from the default par-struct.
+            
+            
+            
+            
+            % IMP: Here you can add a special validation function in a
+            % case. Otherwise parameters to go on will simply those of
+            % khr.Par. And if any missing the default will be loaded. From
+            % this point on, any errors associated with ill parameters,
+            % say, wrong array types etc. is in your hands.
+            
             
             
         end
@@ -437,7 +443,7 @@ else
     fun = str2func(Fun);
     test = version('-release');
     if strcmp(test,'2015a')
-    v = [];
+        v = [];
     else
         v = {};
     end
@@ -549,11 +555,11 @@ if ischar(x)
         elseif A == 2
             
             [pathstr, name, extension] = fileparts(x);
-%             khr.Show = p.Results.Show;
+            %             khr.Show = p.Results.Show;
             switch extension
                 
                 case {'gra','.gra','txt','.txt'}
-
+                    
                     Gofurther = 1;
                     fileID = fopen(x);
                 case ''
@@ -584,34 +590,34 @@ if ischar(x)
                 else
                     idx = strfind(line,' ');
                     if ~isempty(idx)
-                         temp = line(1:idx(1)-1);
-                         
-                         temp2 = str2double(temp);
-                         
-                         if isnumeric(temp2)
-                             Display_Message(sprintf('Validate_Traj: File for Traj "%s" exists and is presumably an ascii-file with a trajectory',x),1);
-                             test = true;
-                         else
-                             Display_Message(sprintf('Validate_Traj: Something is wrong with Traj "%s"',x),2);
-            
-                         end
-                         
+                        temp = line(1:idx(1)-1);
+                        
+                        temp2 = str2double(temp);
+                        
+                        if isnumeric(temp2)
+                            Display_Message(sprintf('Validate_Traj: File for Traj "%s" exists and is presumably an ascii-file with a trajectory',x),1);
+                            test = true;
+                        else
+                            Display_Message(sprintf('Validate_Traj: Something is wrong with Traj "%s"',x),2);
+                            
+                        end
+                        
                     else
                         Display_Message(sprintf('Validate_Traj: Something is wrong with Traj "%s"',x),2);
-            
+                        
                     end
                     
                     
                 end
             else
-              Display_Message(sprintf('Validate_Traj: Something is wrong with Traj "%s"',x),2);
-              
+                Display_Message(sprintf('Validate_Traj: Something is wrong with Traj "%s"',x),2);
+                
             end
         else
             Display_Message(sprintf('Validate_Traj: Something is wrong with Traj "%s"',x),2);
-                
+            
         end
-
+        
     end
 else
     Display_Message(sprintf('Validate_Traj: The Traj must be a literal string'),2);
@@ -697,7 +703,7 @@ switch khr.Traj
         
         Par.T = 3.2e-3;
         Par.Acc = [1,1,1,1];
-                        
+        
         khr.Par = Get_NewPar(khr.Par,Par);
         
         
@@ -734,14 +740,14 @@ switch khr.Traj
         
         Par.T = 3.2e-3;
         Par.Acc = [1,1,1,1];
-                        
+        
         khr.Par = Get_NewPar(khr.Par,Par);
         
         [khr.k,khr.g,khr.s,khr.t,khr.m,khr.N,khr.Ntot] = Traj_2Dspii(khr.GmHW,khr.SmHW,khr.Gmpct,khr.Smpct,khr.gamma,khr.dt,khr.L./max(khr.Acc(1:2)),khr.R./max(khr.Acc(1:2)),'In');
         
         
         khr.N = length(khr.g);
-       
+        
         
         khr.Dim = khr.Traj(1:2);
         
@@ -774,7 +780,7 @@ switch khr.Traj
     case 'Random'
         
         Par.T = 3.2e-3;
-        Par.Gipct = 50;     
+        Par.Gipct = 50;
         khr.Par = Get_NewPar(khr.Par,Par);
         
         khr.N = ceil(khr.Par.T/khr.dt);
@@ -852,7 +858,7 @@ switch khr.Traj
         end
         
         
-         khr.Dim = khr.Traj(1:2);
+        khr.Dim = khr.Traj(1:2);
         
     case '1Dslref'
         Par.TBW = 4;
@@ -919,7 +925,7 @@ switch khr.Traj
         khr.Par.Tactive= khr.Par.NOC*khr.Par.dt;
         khr.Par.Tdead = ceil(khr.Par.Tdead/khr.Par.dt)*khr.Par.dt;
         
-        [khr.k,khr.g,khr.s,khr.t,khr.m,khr.N] = Traj_none4spect2(khr.Par.Tdead,khr.Par.Tactive,khr.Par.dt);        
+        [khr.k,khr.g,khr.s,khr.t,khr.m,khr.N] = Traj_none4spect2(khr.Par.Tdead,khr.Par.Tactive,khr.Par.dt);
     otherwise
         
         fun = str2func(khr.Traj);
@@ -1097,9 +1103,9 @@ try g = load(khr.Traj,'-ascii');
         ting.t = [0:ting.N-1].*ting.dt;
         
         ting.k = ting.gamma.*cumtrapz(ting.t,ting.g,2).*ting.dt-sum(g,2).*ting.dt*ting.gamma;
-
+        
         ting.s = diff([zeros(3,1),ting.g],1,2)./ting.dt;
-
+        
         ting.T = ting.N*ting.dt;
         
         Gabs = sqrt(ting.g(1,:).^2+ting.g(2,:).^2+ting.g(3,:).^2);
@@ -1153,8 +1159,8 @@ N_tot = length(g);
 
 
 T_tot = N_tot*dt;
-
-k = cumsum(g)*dt*gammabar-sum(g,2).*dt*gamma;
+gamma = gammabar*2*pi;
+k = cumsum(g)*dt*gamma-sum(g,2).*dt*gamma;
 t = [0:dt:T_tot-dt];
 m = true(1,N_tot);
 
@@ -1630,20 +1636,20 @@ function nP = Get_NewPar(uP,dP)
 if isempty(uP)
     nP = dP;
 else
-dPnames = recursivefieldnames(dP);
-uPnames = recursivefieldnames(uP);
-nP = struct;
-N = length(dPnames);
-for n = 1:N
-    curName = dPnames{n};
-    test = find(strcmp(curName,uPnames));
-    if isempty(test)
-       eval(['nP.',curName,'=dP.',curName,';'])
-    else
-        eval(['nP.',curName,'=uP.',curName,';'])
+    dPnames = recursivefieldnames(dP);
+    uPnames = recursivefieldnames(uP);
+    nP = struct;
+    N = length(dPnames);
+    for n = 1:N
+        curName = dPnames{n};
+        test = find(strcmp(curName,uPnames));
+        if isempty(test)
+            eval(['nP.',curName,'=dP.',curName,';'])
+        else
+            eval(['nP.',curName,'=uP.',curName,';'])
+        end
+        
     end
-    
-end
 end
 
 end
@@ -1654,7 +1660,7 @@ O=cellfun(@(x)strcat('I.',x),fieldnames(I),'UniformOutput',0);
 
 while q~=0
     H={}; q=length(O);
-    for i=1:length(O) 
+    for i=1:length(O)
         if isstruct(eval(O{i}))==1
             if f~=1
                 A=fieldnames(eval(O{i}));
@@ -1689,8 +1695,8 @@ function fig = Show_khr(khr)
 global h
 h.khr = khr;
 
-    fig = figure;
-    
+fig = figure;
+
 mp = get(0, 'MonitorPositions');
 if size(mp,1) > 1
     mp = mp(1,:);
@@ -2049,11 +2055,11 @@ switch h.Type2
         if h.ShowMagn
             y = abs(y);
         end
-
+        
         axes(h.DispAll)
         plot(x,y,'r','linewidth',2)
-                axis([min(x)-eps,max(x)+eps,min(y)-eps,max(y)+eps])
-
+        axis([min(x)-eps,max(x)+eps,min(y)-eps,max(y)+eps])
+        
     case 'Yt'
         cla(h.DispX)
         cla(h.DispY)
@@ -2069,13 +2075,13 @@ switch h.Type2
         if h.ShowMagn
             y = abs(y);
         end
-
+        
         axes(h.DispAll)
         plot(x,y,'b','linewidth',2)
         %         axis([Xmin,Xmax,Ymin1,Ymax1])
         axis([min(x)-eps,max(x)+eps,min(y)-eps,max(y)+eps])
         hand = h.DispAll;
-
+        
     case 'Zt'
         
         cla(h.DispX)
@@ -2093,11 +2099,11 @@ switch h.Type2
         if h.ShowMagn
             y = abs(y);
         end
-
+        
         axes(h.DispAll)
         plot(x,y,'g','linewidth',2)
         axis([min(x)-eps,max(x)+eps,min(y)-eps,max(y)+eps])
-
+        
     case 'XtYtZt'
         
         
@@ -2117,11 +2123,11 @@ switch h.Type2
             x = h.khr.t;
             
             y = sqrt(y1.^2+y2.^2+y3.^2);
-
+            
             axes(h.DispAll)
             plot(x,y,'k','linewidth',2)
             axis([min(x)-eps,max(x)+eps,min(y)-eps,max(y)+eps])
-
+            
         else
             cla(h.DispX)
             cla(h.DispY)
@@ -2136,10 +2142,10 @@ switch h.Type2
             y2 = Array(2,:);
             y3 = Array(3,:);
             x = h.khr.t;
-
+            
             axes(h.DispX)
             plot(x,y1,'r','linewidth',2)
-axis([min(x)-eps,max(x)+eps,min(y1)-eps,max(y1)+eps])
+            axis([min(x)-eps,max(x)+eps,min(y1)-eps,max(y1)+eps])
             axes(h.DispY)
             plot(x,y2,'b','linewidth',2)
             axis([min(x)-eps,max(x)+eps,min(y2)-eps,max(y2)+eps])

@@ -72,7 +72,7 @@ if isempty(Fun)
         try p.addRequired('spc', @(x)isstruct(x));
             try p.addRequired('khr', @(x)isstruct(x)||isempty(x));
                 try p.addRequired('opt', @(x)isstruct(x)||isempty(x));
-                    try p.addParamValue('opt_n',def_opt_n,@(x)any(valid_opt_ns));
+                    try p.addParamValue('opt_n',def_opt_n,@(x)any(strcmpi(x,valid_opt_ns)));
                         try p.addParamValue('sim_Rlx',def_sim_Rlx,@(x)any(valid_sim_Rlxs));
                             try p.addParamValue('sim_Tx',def_sim_Tx,@(x)any(strcmpi(x,valid_sim_Txs)));
                                 try p.addParamValue('sim_k',def_sim_k,@(x)Validate_ks(x));
@@ -1595,12 +1595,12 @@ switch hsim.sim.Dim
         hsim.axm.Dim1label = ' z [m]';
         hsim.axm.ordinate = squeeze(ordinate);
     case '2DSa'
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
-        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(3),5);
-        hsim.axm.Dim2label = ' y [m]';
-        hsim.axm.Dim1label = ' z [m]';
+        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+        hsim.axm.Dim1label = ' y [m]';
+        hsim.axm.Dim2label = ' z [m]';
         hsim.axm.ordinate = squeeze(ordinate);
     case '2+1DAx'
         hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
@@ -1621,12 +1621,12 @@ switch hsim.sim.Dim
         hsim.axm.Dim1label = ' z [m]';
         hsim.axm.ordinate = squeeze(ordinate(:,:,:,hsim.freqNo));
     case '2+1DSa'
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
-        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(3),5);
-        hsim.axm.Dim2label = ' y [m]';
-        hsim.axm.Dim1label = ' z [m]';
+        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
+        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+        hsim.axm.Dim1label = ' y [m]';
+        hsim.axm.Dim2label = ' z [m]';
         hsim.axm.ordinate = squeeze(ordinate(:,:,:,hsim.freqNo));
     case '3D'
         hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
@@ -2112,8 +2112,8 @@ switch get(hsim.popupmenu_Pulse,'Value')
 end
 if hsim.nNo > 1
 line([hsim.nNo,hsim.nNo],[min(hsim.axp.ordinate(:))-0.1*abs(min(hsim.axp.ordinate(:))),max(hsim.axp.ordinate(:))+0.1*abs(max(hsim.axp.ordinate(:)))],'linewidth',1,'color','red')
-hold off
-% axis tight
+
+
 end
 axis([1,hsim.axp.Dim1axis(end),hsim.axp.Dim2axis(1),hsim.axp.Dim2axis(end)])
 set(hsim.axes_Pulse,'XTick',(hsim.axp.Dim1axis),'YTick',hsim.axp.Dim2axis)
@@ -2121,7 +2121,7 @@ set(hsim.axes_Pulse,'XTickLabel',round(hsim.axp.Dim1ticklabel),'YTickLabel',hsim
 xlabel(hsim.axp.Dim1label)
 ylabel(hsim.axp.Dim2label)
 
-
+hold off
 end
 
 

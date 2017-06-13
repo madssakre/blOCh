@@ -2620,8 +2620,10 @@ opt.M_T = opt.M_t(:,end);
 opt.M_T_store(:,opt.k) = opt.M_T;
 
 
-
-
+Par.lambda = 2e-6;
+Par.Grad = '1st';
+Par.epsilon = '2e-5';
+opt.Par = blOCh__khr('Get_NewPar',[],[],[],opt.Par,Par);
 
 
 Eff = Efficiency_GRAPE_Khaneja(spc,opt);
