@@ -605,7 +605,7 @@ global hsim
 hsim.sim = varargin{1};
 
 
-hsim.fig = figure('Visible','on');
+hsim.fig = figure('Visible','on','Name','blOCh Simulation');
 
 
 mp = get(0, 'MonitorPositions');
@@ -630,7 +630,7 @@ hsim.axes_Magn = axes('Parent',hsim.fig,'Visible','on');
 hsim.axes_Colorbar = axes('Parent',hsim.fig,'Visible','on');
 hsim.axes_Pulse = axes('Parent',hsim.fig,'Visible','on');
 
-
+hsim.edit_B0= uicontrol('Style','edit','Callback',@edit_B0_Callback);
 hsim.listbox1= uicontrol('Style','listbox','Callback',@listbox1_Callback);
 
 hsim.slider_n= uicontrol('Style','slider','Callback',@slider_n_Callback);
@@ -641,6 +641,7 @@ hsim.slider_k= uicontrol('Style','slider','Callback',@slider_k_Callback);
 hsim.slider_B1= uicontrol('Style','slider','Callback',@slider_B1_Callback);
 hsim.slider_B0= uicontrol('Style','slider','Callback',@slider_B0_Callback);
 hsim.popupmenu_Magn= uicontrol('Style','popupmenu','Callback',@popupmenu_Magn_Callback);
+hsim.popupmenu_MagnUnits= uicontrol('Style','popupmenu','Callback',@popupmenu_MagnUnits_Callback);
 hsim.popupmenu_Pulse= uicontrol('Style','popupmenu','Callback',@popupmenu_Pulse_Callback);
 hsim.popupmenu_PulseUnits= uicontrol('Style','popupmenu','Callback',@popupmenu_PulseUnits_Callback);
 
@@ -648,8 +649,8 @@ hsim.pushbutton_playx1= uicontrol('Style','pushbutton','Callback',@pushbutton_pl
 hsim.pushbutton_playx10= uicontrol('Style','pushbutton','Callback',@pushbutton_playx10_Callback);
 hsim.pushbutton_playx100= uicontrol('Style','pushbutton','Callback',@pushbutton_playx100_Callback);
 
-hsim.text1= uicontrol('Style','text');
-hsim.text2= uicontrol('Style','text');
+hsim.text_Mn= uicontrol('Style','text');
+hsim.text_Mx= uicontrol('Style','text');
 hsim.text_n= uicontrol('Style','text');
 hsim.text_Sl= uicontrol('Style','text');
 hsim.text_Tx= uicontrol('Style','text');
@@ -677,8 +678,8 @@ set(hsim.pushbutton_playx10,'Units','normalized')
 set(hsim.pushbutton_playx100,'Units','normalized')
 
 
-set(hsim.text1,'Units','normalized')
-set(hsim.text2,'Units','normalized')
+set(hsim.text_Mn,'Units','normalized')
+set(hsim.text_Mx,'Units','normalized')
 set(hsim.text_n,'Units','normalized')
 set(hsim.text_Sl,'Units','normalized')
 set(hsim.text_Tx,'Units','normalized')
@@ -686,6 +687,7 @@ set(hsim.text_freq,'Units','normalized')
 set(hsim.text_k,'Units','normalized')
 set(hsim.text_B1,'Units','normalized')
 set(hsim.text_B0,'Units','normalized')
+
 
 set(hsim.axes_Magn,'Units','normalized')
 set(hsim.axes_Colorbar,'Units','normalized')
@@ -695,11 +697,13 @@ set(hsim.listbox1,'Units','normalized')
 
 set(hsim.popupmenu_Magn,'Units','normalized')
 
+set(hsim.popupmenu_MagnUnits,'Units','normalized')
+
 set(hsim.popupmenu_Pulse,'Units','normalized')
 
 set(hsim.popupmenu_PulseUnits,'Units','normalized')
 
-
+set(hsim.edit_B0,'Units','normalized')
 %%
 
 hsim.r.x_slider_n = 0.69;
@@ -729,8 +733,8 @@ hsim.r.y_text_Sl = hsim.r.y_slider_Sl;
 hsim.r.y_text_n = hsim.r.y_slider_n;
 
 
-hsim.r.y_text1 = 0.91;%0.095+Sliderheight+Spacer;
-hsim.r.y_text2 = 0.2;% 0.05+Sliderheight+Spacer;
+hsim.r.y_text_Mx = 0.98-Textheight;%0.095+Sliderheight+Spacer;
+hsim.r.y_text_Mn = 0.8;% 0.05+Sliderheight+Spacer;
 
 hsim.r.w_slider_n = 0.3;
 hsim.r.w_slider_Sl = 0.3;
@@ -758,8 +762,8 @@ hsim.r.wo_axes_Magn = hsim.r.ho_axes_Magn/WHratio;
 hsim.r.w_axes_Magn = hsim.r.h_axes_Magn/WHratio;
 % WHratio
 hsim.r.x_axes_Colorbar = 0.625;
-hsim.r.y_axes_Colorbar = 0.25;
-hsim.r.h_axes_Colorbar = 0.65;
+hsim.r.y_axes_Colorbar = 0.8;
+hsim.r.h_axes_Colorbar = 0.18;
 hsim.r.w_axes_Colorbar = 0.02;
 
 hsim.r.x_axes_Pulse = 0.05;
@@ -776,8 +780,8 @@ hsim.r.w_axes_Pulse = 0.9;
 
 
 
-hsim.r.w_text1 =0.05;% 0.98;
-hsim.r.w_text2 =0.05;% 0.48;
+hsim.r.w_text_Mn =0.05;% 0.98;
+hsim.r.w_text_Mx =0.05;% 0.48;
 hsim.r.w_text_n =0.19;% 0.48;
 hsim.r.w_text_Sl =0.19;% 0.48;
 hsim.r.w_text_Tx =0.19;% 0.48;
@@ -786,8 +790,8 @@ hsim.r.w_text_k =0.19;% 0.2;
 hsim.r.w_text_B1 =0.19;% 0.2;
 hsim.r.w_text_B0 =0.19;% 0.2;
 
-hsim.r.x_text1 = 0.62;
-hsim.r.x_text2 = 0.62;
+hsim.r.x_text_Mn = 0.55;
+hsim.r.x_text_Mx = 0.55;
 hsim.r.x_text_n = 0.49;
 hsim.r.x_text_Sl = 0.49;
 hsim.r.x_text_Tx = 0.49;
@@ -796,8 +800,8 @@ hsim.r.x_text_k = 0.49;
 hsim.r.x_text_B1 = 0.49;
 hsim.r.x_text_B0 = 0.49;
 
-hsim.r.h_text1 = Textheight;
-hsim.r.h_text2 = Textheight;
+hsim.r.h_text_Mn = Textheight;
+hsim.r.h_text_Mx = Textheight;
 hsim.r.h_text_n = Textheight;
 hsim.r.h_text_Sl = Textheight;
 hsim.r.h_text_Tx = Textheight;
@@ -811,12 +815,23 @@ hsim.r.y_popupmenu_Magn = 0.94;
 hsim.r.w_popupmenu_Magn = 0.1;
 hsim.r.h_popupmenu_Magn = 0.05;
 
-hsim.r.x_popupmenu_Pulse = 0.005+0.1+0.01;
+hsim.r.x_popupmenu_MagnUnits = 0.005+0.1+0.01;
+hsim.r.y_popupmenu_MagnUnits = 0.94;
+hsim.r.w_popupmenu_MagnUnits = 0.1;
+hsim.r.h_popupmenu_MagnUnits = 0.05;
+
+hsim.r.x_edit_B0 = 0.005+0.1+0.01+0.1+0.01;
+hsim.r.y_edit_B0 = 0.97;
+hsim.r.w_edit_B0 = 0.075;
+hsim.r.h_edit_B0 = 0.02;
+
+
+hsim.r.x_popupmenu_Pulse = 0.005+0.2+0.01+0.1+0.01;
 hsim.r.y_popupmenu_Pulse = 0.94;
 hsim.r.w_popupmenu_Pulse = 0.1;
 hsim.r.h_popupmenu_Pulse = 0.05;
 
-hsim.r.x_popupmenu_PulseUnits = 0.005+0.1+0.01+0.1+0.01;
+hsim.r.x_popupmenu_PulseUnits = 0.005+0.2+0.01+0.1+0.01+0.1+0.01;
 hsim.r.y_popupmenu_PulseUnits = 0.94;
 hsim.r.w_popupmenu_PulseUnits = 0.1;
 hsim.r.h_popupmenu_PulseUnits = 0.05;
@@ -851,8 +866,8 @@ set(hsim.slider_k,'Position',[hsim.r.x_slider_k,hsim.r.y_slider_k,hsim.r.w_slide
 set(hsim.slider_B1,'Position',[hsim.r.x_slider_B1,hsim.r.y_slider_B1,hsim.r.w_slider_B1,hsim.r.h_slider_B1])
 set(hsim.slider_B0,'Position',[hsim.r.x_slider_B0,hsim.r.y_slider_B0,hsim.r.w_slider_B0,hsim.r.h_slider_B0])
 
-set(hsim.text1,'Position',[hsim.r.x_text1,hsim.r.y_text1,hsim.r.w_text1,hsim.r.h_text1])
-set(hsim.text2,'Position',[hsim.r.x_text2,hsim.r.y_text2,hsim.r.w_text2,hsim.r.h_text2])
+set(hsim.text_Mn,'Position',[hsim.r.x_text_Mn,hsim.r.y_text_Mn,hsim.r.w_text_Mn,hsim.r.h_text_Mn])
+set(hsim.text_Mx,'Position',[hsim.r.x_text_Mx,hsim.r.y_text_Mx,hsim.r.w_text_Mx,hsim.r.h_text_Mx])
 set(hsim.text_n,'Position',[hsim.r.x_text_n,hsim.r.y_text_n,hsim.r.w_text_n,hsim.r.h_text_n],'HorizontalAlignment','right')
 set(hsim.text_Sl,'Position',[hsim.r.x_text_Sl,hsim.r.y_text_Sl,hsim.r.w_text_Sl,hsim.r.h_text_Sl],'HorizontalAlignment','right')
 set(hsim.text_Tx,'Position',[hsim.r.x_text_Tx,hsim.r.y_text_Tx,hsim.r.w_text_Tx,hsim.r.h_text_Tx],'HorizontalAlignment','right')
@@ -871,6 +886,11 @@ set(hsim.axes_Colorbar,'Position',[hsim.r.x_axes_Colorbar,hsim.r.y_axes_Colorbar
 set(hsim.listbox1,'Position',[hsim.r.x_listbox1,hsim.r.y_listbox1,hsim.r.w_listbox1,hsim.r.h_listbox1])
 
 set(hsim.popupmenu_Magn,'Position',[hsim.r.x_popupmenu_Magn,hsim.r.y_popupmenu_Magn,hsim.r.w_popupmenu_Magn,hsim.r.h_popupmenu_Magn])
+set(hsim.popupmenu_MagnUnits,'Position',[hsim.r.x_popupmenu_MagnUnits,hsim.r.y_popupmenu_MagnUnits,hsim.r.w_popupmenu_MagnUnits,hsim.r.h_popupmenu_MagnUnits])
+
+set(hsim.edit_B0,'Position',[hsim.r.x_edit_B0,hsim.r.y_edit_B0,hsim.r.w_edit_B0,hsim.r.h_edit_B0])
+
+
 set(hsim.popupmenu_Pulse,'Position',[hsim.r.x_popupmenu_Pulse,hsim.r.y_popupmenu_Pulse,hsim.r.w_popupmenu_Pulse,hsim.r.h_popupmenu_Pulse])
 set(hsim.popupmenu_PulseUnits,'Position',[hsim.r.x_popupmenu_PulseUnits,hsim.r.y_popupmenu_PulseUnits,hsim.r.w_popupmenu_PulseUnits,hsim.r.h_popupmenu_PulseUnits])
 
@@ -880,12 +900,12 @@ set(hsim.pushbutton_playx100,'Position',[hsim.r.x_pushbutton_playx100,hsim.r.y_p
 
 if str2double(hsim.sim.Dim(1)) > 1
     set(hsim.axes_Colorbar,'Visible','on')
-    set(hsim.text1,'Visible','on')
-    set(hsim.text2,'Visible','on')
+    set(hsim.text_Mn,'Visible','on')
+    set(hsim.text_Mx,'Visible','on')
 else
     set(hsim.axes_Colorbar,'Visible','off')
-    set(hsim.text1,'Visible','off')
-    set(hsim.text2,'Visible','off')
+    set(hsim.text_Mn,'Visible','off')
+    set(hsim.text_Mx,'Visible','off')
 end
 set(hsim.text_freq,'Visible','on')
 set(hsim.text_k,'Visible','on')
@@ -1008,17 +1028,18 @@ else
     
 end
 %%
+
 if hsim.sim.B0inhom_N==1
     set(hsim.slider_B0,'Visible','off','Value',1)
     set(hsim.text_B0,'Visible','off');
     hsim.nB0inh = 1;
 else
-    set(hsim.slider_B0,'Min',1)
-    set(hsim.slider_B0,'Max',hsim.sim.B1inhom_N)
-    B0SliderStep = [1, 1] / (hsim.sim.B0inhom_N - 1);
-    set(hsim.slider_B0,'SliderStep',B0SliderStep)
     hsim.nB0inh = round(hsim.sim.B0inhom_N/2);
-    set(hsim.slider_B0,'Visible','on','Value',hsim.nB0inh)
+
+    B0SliderStep = [1, 1] / (hsim.sim.B0inhom_N - 1);
+    
+    set(hsim.slider_B0,'Min',1,'Max',hsim.sim.B0inhom_N,'SliderStep',B0SliderStep,'Value',hsim.nB0inh,'Visible','on')
+
     set(hsim.text_B0,'Visible','on','String',sprintf('B0 offset %i of %i (%1.1e Hz)',hsim.nB0inh,hsim.sim.B0inhom_N,hsim.sim.B0inhom_offsets(hsim.nB0inh)))
     
 end
@@ -1074,6 +1095,23 @@ set(hsim.popupmenu_PulseUnits, 'String', hsim.popupmenu_PulseUnitsString);
 
 set(hsim.popupmenu_PulseUnits, 'Value',1);
 %%
+String = cell(1,4);
+String{1} = ' m and Hz';
+String{2} = ' m and ppm';
+String{3} = 'cm and Hz';
+String{4} = 'cm and ppm';
+String{5} = 'mm and Hz';
+String{6} = 'mm and ppm';
+
+set(hsim.popupmenu_MagnUnits, 'String', String);
+set(hsim.popupmenu_MagnUnits, 'Value',1);
+
+%%
+set(hsim.edit_B0,'Visible','off','String','3T');
+hsim.B0inT = 3;
+% edit_B0_Callback;
+
+%%
 [hsim.colmap.Jet,hsim.colmap.Gray] = GetColormaps;
 
 hsim.Colmap = hsim.colmap.Jet;
@@ -1083,13 +1121,52 @@ hsim = Plotting(hsim);
 
 fig = hsim.fig;
 end
-
+%%
 function popupmenu_Magn_Callback(hOb, ed)
 global hsim
 hsim.popupmenu_Magnselect = get(hsim.popupmenu_Magn,'Value');
 hsim = Plotting(hsim);
 end
+%%
+function popupmenu_MagnUnits_Callback(hOb, ed)
+global hsim
+hsim.popupmenu_MagnUnitsselect = get(hsim.popupmenu_MagnUnits,'Value');
+switch hsim.popupmenu_MagnUnitsselect
+    case {1,3,5}
+        set(hsim.edit_B0,'Visible','off')
+    case {2,4,6}
+        set(hsim.edit_B0,'Visible','on')
+        edit_B0_Callback;
+end
+slider_B0_Callback;
+slider_freq_Callback;
+hsim = Plotting(hsim);
+end
+%%
+function edit_B0_Callback(hOb, ed)
+global hsim
+String = get(hsim.edit_B0,'String');
 
+test1  = strcmp(String(end),'T');
+test2 = isnumeric(str2double(String(1:end-1)));
+
+if test1 && test2
+    
+    set(hsim.edit_B0,'String',String);
+    hsim.B0inT = str2double(String(1:end-1));
+else
+    NewString = 'Select positive number (only)';
+    set(hsim.edit_B0,'String',NewString);
+    pause(2)
+    NewString = '3T';
+    set(hsim.edit_B0,'String',NewString);
+    hsim.B0inT = 3;
+end
+slider_B0_Callback;
+slider_freq_Callback;
+hsim = Plotting(hsim);
+end
+%%
 function popupmenu_Pulse_Callback(hOb, ed)
 global hsim
 
@@ -1127,7 +1204,7 @@ switch hsim.popupmenu_Pulseselect
     case {1,3,4}
         PulseUnitsString = {'rad/s','Hz','uT'};
     case {2}
-        PulseUnitsString = {'rad','deg.'};    
+        PulseUnitsString = {'rad','deg.'};
         
     case {5,6,7}
         PulseUnitsString = {'mT/m','G/cm'};
@@ -1190,11 +1267,19 @@ end
 
 function slider_freq_Callback(hOb, ed)
 global hsim
-hsim.freqNo = round(get(hOb, 'Value'));
-set(hOb, 'Value',hsim.freqNo);
-set(hsim.text_freq,'Visible','on','String',sprintf('Frequency: %.2f [Hz]',hsim.freq(hsim.freqNo)))
+hsim.freqNo = round(get(hsim.slider_freq, 'Value'));
+set(hsim.slider_freq, 'Value',hsim.freqNo);
+switch hsim.popupmenu_MagnUnitsselect
+    case {1,3,5}
+        
+        set(hsim.text_freq,'String',sprintf('Frequency: %.2f [Hz]',hsim.freq(hsim.freqNo)))
+    case {2,4,6}
+        set(hsim.text_freq,'String',sprintf('Frequency: %.2f [ppm]',hsim.freq(hsim.freqNo).*2*pi*1e6/(hsim.sim.gamma*hsim.B0inT)))
+end
 hsim = Plotting(hsim);
 end
+
+% ;
 
 function slider_k_Callback(hOb, ed)
 global hsim
@@ -1242,10 +1327,15 @@ end
 
 function slider_B0_Callback(hOb, ed)
 global hsim
-hsim.nB0inh = round(get(hOb, 'Value'));
-set(hOb, 'Value',hsim.nB0inh);
-set(hsim.text_B0,'Visible','on','String',sprintf('B0 offset %i of %i (%1.1e Hz)',hsim.nB0inh,hsim.sim.B0inhom_N,hsim.sim.B0inhom_offsets(hsim.nB0inh)))
-
+% hsim.nB0inh = round(get(hOb, 'Value'));
+hsim.nB0inh = round(get(hsim.slider_B0,'Value'));
+set(hsim.slider_B0, 'Value',hsim.nB0inh);
+switch hsim.popupmenu_MagnUnitsselect
+    case {1,3,5}
+        set(hsim.text_B0,'String',sprintf('B0 offset %i of %i (%1.1e Hz)',hsim.nB0inh,hsim.sim.B0inhom_N,hsim.sim.B0inhom_offsets(hsim.nB0inh)))
+    case {2,4,6}
+        set(hsim.text_B0,'String',sprintf('B0 offset %i of %i (%1.1e ppm)',hsim.nB0inh,hsim.sim.B0inhom_N,hsim.sim.B0inhom_offsets(hsim.nB0inh).*2*pi*1e6/(hsim.sim.gamma*hsim.B0inT)))
+end
 hsim = Plotting(hsim);
 end
 
@@ -1385,7 +1475,7 @@ end
 function [Jet,Gray] = GetColormaps
 
 jett = colormap(jet(512));
-
+jett = jett(end:-1:1,:);
 Jet = zeros(512,10,3);
 Jet(:,:,1) = repmat(jett(:,1),[1,10,1]);
 Jet(:,:,2) = repmat(jett(:,2),[1,10,1]);
@@ -1534,138 +1624,509 @@ end
 switch hsim.sim.Dim
     
     case '1DSI'
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
         
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
-        hsim.axm.Dim1label = ' z [m]';
+        
+        switch hsim.popupmenu_MagnUnitsselect
+            case 1
+                hsim.axm.Dim1label = ' z [m]';
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+            case 2
+                hsim.axm.Dim1label = ' z [m]';
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+            case 3
+                hsim.axm.Dim1label = ' z [cm]';
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*100;
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+            case 4
+                hsim.axm.Dim1label = ' z [cm]';
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*100;
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+            case 5
+                hsim.axm.Dim1label = ' z [mm]';
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*1000;
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+            case 6
+                hsim.axm.Dim1label = ' z [mm]';
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*1000;
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+        end
+        
         hsim.axm.ordinate = squeeze(ordinate);
         
         
         
         
     case '1DAP'
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
-        hsim.axm.Dim1label = ' y [m]';
+        
         hsim.axm.ordinate = squeeze(ordinate);
+        switch hsim.popupmenu_MagnUnitsselect
+            case 1
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [m]';
+            case 2
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [m]';
+            case 3
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*100;
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [cm]';
+            case 4
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*100;
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [cm]';
+            case 5
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*1000;
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [mm]';
+            case 6
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*1000;
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [mm]';
+        end
     case '1DRL'
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
-        hsim.axm.Dim1label = ' x [m]';
+        
+        switch hsim.popupmenu_MagnUnitsselect
+            case 1
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1label = ' x [m]';
+            case 2
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1label = ' x [m]';
+            case 3
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*100;
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1label = ' x [cm]';
+            case 4
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*100;
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1label = ' x [cm]';
+            case 5
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*1000;
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1label = ' x [mm]';
+            case 6
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*1000;
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1label = ' x [mm]';
+        end
+        %         switch hsim.popupmenu_MagnUnitsselect
+        %             case 1
+        %             case 2
+        %             case 3
+        %             case 4
+        %             case 5
+        %             case 6
+        %         end
+        
         hsim.axm.ordinate = squeeze(ordinate);
     case '1+1DSI'
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
-        hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
-        hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
-        hsim.axm.Dim1label = ' z [m]';
-        hsim.axm.Dim2label = ' v [Hz]';
+        
+        
+        switch hsim.popupmenu_MagnUnitsselect
+            case 1
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' z [m]';
+                hsim.axm.Dim2label = ' v [Hz]';
+            case 2
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5).*2*pi*1e6/(hsim.sim.gamma*hsim.B0inT);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' z [m]';
+                hsim.axm.Dim2label = ' v [ppm]';
+            case 3
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*100;
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' z [cm]';
+                hsim.axm.Dim2label = ' v [Hz]';
+            case 4
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*100;
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5).*2*pi*1e6/(hsim.sim.gamma*hsim.B0inT);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' z [cm]';
+                hsim.axm.Dim2label = ' v [ppm]';
+            case 5
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*1000;
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' z [mm]';
+                hsim.axm.Dim2label = ' v [Hz]';
+            case 6
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*1000;
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5).*2*pi*1e6/(hsim.sim.gamma*hsim.B0inT);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' z [mm]';
+                hsim.axm.Dim2label = ' v [ppm]';
+        end
+        
+        
         hsim.axm.ordinate = squeeze(ordinate);
     case '1+1DAP'
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
-        hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
-        hsim.axm.Dim1label = ' y [m]';
-        hsim.axm.Dim2label = ' v [Hz]';
+        
+        
+        switch hsim.popupmenu_MagnUnitsselect
+            case 1
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' y [m]';
+                hsim.axm.Dim2label = ' v [Hz]';
+            case 2
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5).*2*pi*1e6/(hsim.sim.gamma*hsim.B0inT);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' y [m]';
+                hsim.axm.Dim2label = ' v [ppm]';
+            case 3
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*100;
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' y [cm]';
+                hsim.axm.Dim2label = ' v [Hz]';
+            case 4
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*100;
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5).*2*pi*1e6/(hsim.sim.gamma*hsim.B0inT);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' y [cm]';
+                hsim.axm.Dim2label = ' v [ppm]';
+            case 5
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*1000;
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' y [mm]';
+                hsim.axm.Dim2label = ' v [Hz]';
+            case 6
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*1000;
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5).*2*pi*1e6/(hsim.sim.gamma*hsim.B0inT);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' y [mm]';
+                hsim.axm.Dim2label = ' v [ppm]';
+        end
+        
+        
         hsim.axm.ordinate = squeeze(ordinate);
     case '1+1DRL'
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
-        hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
-        hsim.axm.Dim1label = ' x [m]';
-        hsim.axm.Dim2label = ' v [Hz]';
+        
+        switch hsim.popupmenu_MagnUnitsselect
+            case 1
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' x [m]';
+                hsim.axm.Dim2label = ' v [Hz]';
+            case 2
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5).*2*pi*1e6/(hsim.sim.gamma*hsim.B0inT);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' x [m]';
+                hsim.axm.Dim2label = ' v [ppm]';
+            case 3
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*100;
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' x [cm]';
+                hsim.axm.Dim2label = ' v [Hz]';
+            case 4
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*100;
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5).*2*pi*1e6/(hsim.sim.gamma*hsim.B0inT);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' x [cm]';
+                hsim.axm.Dim2label = ' v [ppm]';
+            case 5
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*1000;
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' x [mm]';
+                hsim.axm.Dim2label = ' v [Hz]';
+            case 6
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*1000;
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5).*2*pi*1e6/(hsim.sim.gamma*hsim.B0inT);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' x [mm]';
+                hsim.axm.Dim2label = ' v [ppm]';
+        end
+        
+        
+        
         hsim.axm.ordinate = squeeze(ordinate);
     case '2DAx'
-        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
-        hsim.axm.Dim1label = ' y [m]';
-        hsim.axm.Dim2label = ' x [m]';
+        
+        switch hsim.popupmenu_MagnUnitsselect
+            case {1,2}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [m]';
+                hsim.axm.Dim2label = ' x [m]';
+            case {3,4}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*100;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*100;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [cm]';
+                hsim.axm.Dim2label = ' x [cm]';
+            case {5,6}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*1000;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*1000;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [mm]';
+                hsim.axm.Dim2label = ' x [mm]';
+        end
+        
+        
         hsim.axm.ordinate = squeeze(ordinate);
     case '2DCo'
-        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
-        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+        switch hsim.popupmenu_MagnUnitsselect
+            case {1,2}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                
+                hsim.axm.Dim2label = ' x [m]';
+                hsim.axm.Dim1label = ' z [m]';
+            case {3,4}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*100;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*100;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                
+                hsim.axm.Dim2label = ' x [cm]';
+                hsim.axm.Dim1label = ' z [cm]';
+            case {5,6}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*1000;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*1000;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                
+                hsim.axm.Dim2label = ' x [mm]';
+                hsim.axm.Dim1label = ' z [mm]';
+        end
         
-        hsim.axm.Dim2label = ' x [m]';
-        hsim.axm.Dim1label = ' z [m]';
         hsim.axm.ordinate = squeeze(ordinate);
     case '2DSa'
-        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
-        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
-        hsim.axm.Dim1label = ' y [m]';
-        hsim.axm.Dim2label = ' z [m]';
+        switch hsim.popupmenu_MagnUnitsselect
+            case {1,2}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                hsim.axm.Dim1label = ' y [m]';
+                hsim.axm.Dim2label = ' z [m]';
+            case {3,4}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*100;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*100;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                hsim.axm.Dim1label = ' y [cm]';
+                hsim.axm.Dim2label = ' z [cm]';
+            case {5,6}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*1000;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*1000;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                hsim.axm.Dim1label = ' y [mm]';
+                hsim.axm.Dim2label = ' z [mm]';
+        end
+        
         hsim.axm.ordinate = squeeze(ordinate);
     case '2+1DAx'
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
-        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
-        hsim.axm.Dim2label = ' x [m]';
-        hsim.axm.Dim1label = ' y [m]';
+        switch hsim.popupmenu_MagnUnitsselect
+            case {1,2}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [m]';
+                hsim.axm.Dim2label = ' x [m]';
+            case {3,4}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*100;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*100;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [cm]';
+                hsim.axm.Dim2label = ' x [cm]';
+            case {5,6}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*1000;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*1000;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [mm]';
+                hsim.axm.Dim2label = ' x [mm]';
+        end
+        
         
         hsim.axm.ordinate = squeeze(ordinate(:,:,:,hsim.freqNo));
     case '2+1DCo'
-        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
-        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
-        
-        hsim.axm.Dim2label = ' x [m]';
-        hsim.axm.Dim1label = ' z [m]';
+        switch hsim.popupmenu_MagnUnitsselect
+            case {1,2}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                
+                hsim.axm.Dim2label = ' x [m]';
+                hsim.axm.Dim1label = ' z [m]';
+            case {3,4}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*100;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*100;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                
+                hsim.axm.Dim2label = ' x [cm]';
+                hsim.axm.Dim1label = ' z [cm]';
+            case {5,6}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*1000;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*1000;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                
+                hsim.axm.Dim2label = ' x [mm]';
+                hsim.axm.Dim1label = ' z [mm]';
+        end
         hsim.axm.ordinate = squeeze(ordinate(:,:,:,hsim.freqNo));
     case '2+1DSa'
-        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
-        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
-        hsim.axm.Dim1label = ' y [m]';
-        hsim.axm.Dim2label = ' z [m]';
+        switch hsim.popupmenu_MagnUnitsselect
+            case {1,2}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                hsim.axm.Dim1label = ' y [m]';
+                hsim.axm.Dim2label = ' z [m]';
+            case {3,4}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*100;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*100;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                hsim.axm.Dim1label = ' y [cm]';
+                hsim.axm.Dim2label = ' z [cm]';
+            case {5,6}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*1000;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5).*1000;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(3),5);
+                hsim.axm.Dim1label = ' y [mm]';
+                hsim.axm.Dim2label = ' z [mm]';
+        end
         hsim.axm.ordinate = squeeze(ordinate(:,:,:,hsim.freqNo));
     case '3D'
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
-        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
-        hsim.axm.Dim2label = ' x [m]';
-        hsim.axm.Dim1label = ' y [m]';
+        switch hsim.popupmenu_MagnUnitsselect
+            case {1,2}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [m]';
+                hsim.axm.Dim2label = ' x [m]';
+            case {3,4}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*100;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*100;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [cm]';
+                hsim.axm.Dim2label = ' x [cm]';
+            case {5,6}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*1000;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*1000;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [mm]';
+                hsim.axm.Dim2label = ' x [mm]';
+        end
+        %         switch hsim.popupmenu_MagnUnitsselect
+        %             case 1
+        %             case 2
+        %             case 3
+        %             case 4
+        %             case 5
+        %             case 6
+        %         end
+        
         hsim.axm.ordinate = squeeze(ordinate(:,:,hsim.SlNo,1));
     case '3+1D'
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
-        hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
-        hsim.axm.Dim2axis = linspace(1,hsim.sim.R(2),5);
-        hsim.axm.Dim2label = ' x [m]';
-        hsim.axm.Dim1label = ' y [m]';
+        switch hsim.popupmenu_MagnUnitsselect
+            case {1,2}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [m]';
+                hsim.axm.Dim2label = ' x [m]';
+            case {3,4}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*100;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*100;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [cm]';
+                hsim.axm.Dim2label = ' x [cm]';
+            case {5,6}
+                hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5).*1000;
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5).*1000;
+                hsim.axm.Dim2axis = linspace(1,hsim.sim.R(1),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
+                hsim.axm.Dim1label = ' y [mm]';
+                hsim.axm.Dim2label = ' x [mm]';
+        end
         hsim.axm.ordinate = squeeze(ordinate(:,:,hsim.SlNo,hsim.freqNo));
     case '0+1D'
-        hsim.axm.Dim1ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
-        hsim.axm.Dim1axis = linspace(1,hsim.sim.Rv,5);
-        hsim.axm.Dim1label = ' v [Hz]';
+        switch hsim.popupmenu_MagnUnitsselect
+            case {1,3,5}
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' v [Hz]';
+            case {2,4,6}
+                hsim.axm.Dim1ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5).*2*pi*1e6/(hsim.sim.gamma*hsim.B0inT);
+                hsim.axm.Dim1axis = linspace(1,hsim.sim.Rv,5);
+                hsim.axm.Dim1label = ' v [ppm]';
+        end
+        
         hsim.axm.ordinate = squeeze(ordinate);
 end
 
 % switch hsim.popupmenu_Pulseselect
-%     
+%
 %     case {1,3,4}
 %         PulseUnitsString = {'rad/s','Hz'};
 %     case {2}
-%         PulseUnitsString = {'rad','deg.'};    
-%         
+%         PulseUnitsString = {'rad','deg.'};
+%
 %     case {5,6,7}
 %         PulseUnitsString = {'T/s','G/cm'};
 %     case {10,11,12}
 %         PulseUnitsString = {'1/m','1/cm'};
 %     otherwise
 %         PulseUnitsString = {'arb.'};
-%         
-%         
+%
+%
 % end
 
 switch get(hsim.popupmenu_Pulse,'Value')
@@ -1685,16 +2146,16 @@ switch get(hsim.popupmenu_Pulse,'Value')
             hsim.axp.ordinate = abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
             
         end
-       switch hsim.popupmenu_PulseUnitsselect
-           case 1
-               hsim.axp.Dim2label = ' |\omega| [rad/s]';
-           case 2
-               hsim.axp.ordinate = hsim.axp.ordinate/2/pi;
-               hsim.axp.Dim2label = ' |\omega| [Hz]';
-           case 3
-               hsim.axp.ordinate = hsim.axp.ordinate./hsim.sim.gamma*1e6;
-               hsim.axp.Dim2label = ' |\omega| [uT]';    
-       end
+        switch hsim.popupmenu_PulseUnitsselect
+            case 1
+                hsim.axp.Dim2label = ' |\omega| [rad/s]';
+            case 2
+                hsim.axp.ordinate = hsim.axp.ordinate/2/pi;
+                hsim.axp.Dim2label = ' |\omega| [Hz]';
+            case 3
+                hsim.axp.ordinate = hsim.axp.ordinate./hsim.sim.gamma*1e6;
+                hsim.axp.Dim2label = ' |\omega| [uT]';
+        end
         
         Mx = max(hsim.axp.ordinate(:))+eps;
         hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
@@ -1719,16 +2180,16 @@ switch get(hsim.popupmenu_Pulse,'Value')
         end
         
         switch hsim.popupmenu_PulseUnitsselect
-           case 1
-               hsim.axp.Dim2label = ' \angle\omega [rad]';
-               hsim.axp.Dim2ticklabel = {'-pi','0','pi'};
-        hsim.axp.Dim2axis = linspace(-pi,pi,3);
-           case 2
-               hsim.axp.ordinate = hsim.axp.ordinate*180/pi;
-               hsim.axp.Dim2ticklabel = {'-180','0','180'};
-        hsim.axp.Dim2axis = linspace(-180,180,3);
-               hsim.axp.Dim2label = ' \angle\omega [deg.]';
-       end
+            case 1
+                hsim.axp.Dim2label = ' \angle\omega [rad]';
+                hsim.axp.Dim2ticklabel = {'-\pi','0','\pi'};
+                hsim.axp.Dim2axis = linspace(-pi,pi,3);
+            case 2
+                hsim.axp.ordinate = hsim.axp.ordinate*180/pi;
+                hsim.axp.Dim2ticklabel = {'-180','0','180'};
+                hsim.axp.Dim2axis = linspace(-180,180,3);
+                hsim.axp.Dim2label = ' \angle\omega [deg.]';
+        end
         
         hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
         
@@ -1752,15 +2213,15 @@ switch get(hsim.popupmenu_Pulse,'Value')
             hsim.axp.ordinate = real(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
         end
         switch hsim.popupmenu_PulseUnitsselect
-           case 1
-               hsim.axp.Dim2label = ' Re(\omega) [rad/s]';
-           case 2
-               hsim.axp.ordinate = hsim.axp.ordinate/2/pi;
-               hsim.axp.Dim2label = ' Re(\omega) [Hz]';
-           case 3
-               hsim.axp.ordinate = hsim.axp.ordinate./hsim.sim.gamma*1e6;
-               hsim.axp.Dim2label = ' Re(\omega) [uT]';    
-       end
+            case 1
+                hsim.axp.Dim2label = ' Re(\omega) [rad/s]';
+            case 2
+                hsim.axp.ordinate = hsim.axp.ordinate/2/pi;
+                hsim.axp.Dim2label = ' Re(\omega) [Hz]';
+            case 3
+                hsim.axp.ordinate = hsim.axp.ordinate./hsim.sim.gamma*1e6;
+                hsim.axp.Dim2label = ' Re(\omega) [uT]';
+        end
         
         Mn = min(hsim.axp.ordinate(:))-eps;
         Mx = max(hsim.axp.ordinate(:))+eps;
@@ -1786,15 +2247,15 @@ switch get(hsim.popupmenu_Pulse,'Value')
             hsim.axp.ordinate = imag(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
         end
         switch hsim.popupmenu_PulseUnitsselect
-           case 1
-               hsim.axp.Dim2label = ' Im(\omega) [rad/s]';
-           case 2
-               hsim.axp.ordinate = hsim.axp.ordinate/2/pi;
-               hsim.axp.Dim2label = ' Im(\omega) [Hz]';
-           case 3
-               hsim.axp.ordinate = hsim.axp.ordinate./hsim.sim.gamma*1e6;
-               hsim.axp.Dim2label = ' Im(\omega) [uT]';    
-       end
+            case 1
+                hsim.axp.Dim2label = ' Im(\omega) [rad/s]';
+            case 2
+                hsim.axp.ordinate = hsim.axp.ordinate/2/pi;
+                hsim.axp.Dim2label = ' Im(\omega) [Hz]';
+            case 3
+                hsim.axp.ordinate = hsim.axp.ordinate./hsim.sim.gamma*1e6;
+                hsim.axp.Dim2label = ' Im(\omega) [uT]';
+        end
         
         Mn = min(hsim.axp.ordinate(:))-eps;
         Mx = max(hsim.axp.ordinate(:))+eps;
@@ -1810,13 +2271,13 @@ switch get(hsim.popupmenu_Pulse,'Value')
         hsim.axp.ordinate = hsim.sim.g(1,:).';
         
         switch hsim.popupmenu_PulseUnitsselect
-           case 1
-               hsim.axp.ordinate = hsim.axp.ordinate*1e3;
-               hsim.axp.Dim2label = ' G_x [mT/m]';
-           case 2
-               hsim.axp.ordinate = hsim.axp.ordinate*1e2;
-               hsim.axp.Dim2label = ' G_x [G/cm]';
-       end
+            case 1
+                hsim.axp.ordinate = hsim.axp.ordinate*1e3;
+                hsim.axp.Dim2label = ' G_x [mT/m]';
+            case 2
+                hsim.axp.ordinate = hsim.axp.ordinate*1e2;
+                hsim.axp.Dim2label = ' G_x [G/cm]';
+        end
         
         
         Mn = min(hsim.axp.ordinate(:))-eps;
@@ -1833,13 +2294,13 @@ switch get(hsim.popupmenu_Pulse,'Value')
         hsim.axp.ordinate = hsim.sim.g(2,:).';
         
         switch hsim.popupmenu_PulseUnitsselect
-           case 1
-               hsim.axp.ordinate = hsim.axp.ordinate*1e3;
-               hsim.axp.Dim2label = ' G_y [mT/m]';
-           case 2
-               hsim.axp.ordinate = hsim.axp.ordinate*1e2;
-               hsim.axp.Dim2label = ' G_y [G/cm]';
-       end
+            case 1
+                hsim.axp.ordinate = hsim.axp.ordinate*1e3;
+                hsim.axp.Dim2label = ' G_y [mT/m]';
+            case 2
+                hsim.axp.ordinate = hsim.axp.ordinate*1e2;
+                hsim.axp.Dim2label = ' G_y [G/cm]';
+        end
         Mn = min(hsim.axp.ordinate(:))-eps;
         Mx = max(hsim.axp.ordinate(:))+eps;
         hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
@@ -1853,13 +2314,13 @@ switch get(hsim.popupmenu_Pulse,'Value')
         hsim.axp.ordinate = hsim.sim.g(3,:).';
         
         switch hsim.popupmenu_PulseUnitsselect
-           case 1
-               hsim.axp.ordinate = hsim.axp.ordinate*1e3;
-               hsim.axp.Dim2label = ' G_z [mT/m]';
-           case 2
-               hsim.axp.ordinate = hsim.axp.ordinate*1e2;
-               hsim.axp.Dim2label = ' G_z [G/cm]';
-       end
+            case 1
+                hsim.axp.ordinate = hsim.axp.ordinate*1e3;
+                hsim.axp.Dim2label = ' G_z [mT/m]';
+            case 2
+                hsim.axp.ordinate = hsim.axp.ordinate*1e2;
+                hsim.axp.Dim2label = ' G_z [G/cm]';
+        end
         Mn = min(hsim.axp.ordinate(:))-eps;
         Mx = max(hsim.axp.ordinate(:))+eps;
         hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
@@ -1924,13 +2385,13 @@ switch get(hsim.popupmenu_Pulse,'Value')
         
         
         switch hsim.popupmenu_PulseUnitsselect
-           case 1
-               
-               hsim.axp.Dim2label = ' k_x [1/m]';
-           case 2
-               hsim.axp.ordinate = hsim.axp.ordinate*1e-2;
-               hsim.axp.Dim2label = ' k_x [1/cm]';
-       end
+            case 1
+                
+                hsim.axp.Dim2label = ' k_x [1/m]';
+            case 2
+                hsim.axp.ordinate = hsim.axp.ordinate*1e-2;
+                hsim.axp.Dim2label = ' k_x [1/cm]';
+        end
         
         Mn = min(hsim.axp.ordinate(:))-eps;
         Mx = max(hsim.axp.ordinate(:))+eps;
@@ -1947,13 +2408,13 @@ switch get(hsim.popupmenu_Pulse,'Value')
         hsim.axp.colorpulse = temp(2,:);
         hsim.axp.ordinate = cumsum(hsim.sim.g(2,:).').*hsim.sim.dt*hsim.sim.gamma/2/pi - sum(hsim.sim.g(2,:).').*hsim.sim.dt*hsim.sim.gamma/2/pi;
         switch hsim.popupmenu_PulseUnitsselect
-           case 1
-               
-               hsim.axp.Dim2label = ' k_y [1/m]';
-           case 2
-               hsim.axp.ordinate = hsim.axp.ordinate*1e-2;
-               hsim.axp.Dim2label = ' k_y [1/cm]';
-       end
+            case 1
+                
+                hsim.axp.Dim2label = ' k_y [1/m]';
+            case 2
+                hsim.axp.ordinate = hsim.axp.ordinate*1e-2;
+                hsim.axp.Dim2label = ' k_y [1/cm]';
+        end
         Mn = min(hsim.axp.ordinate(:))-eps;
         Mx = max(hsim.axp.ordinate(:))+eps;
         hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
@@ -1966,13 +2427,13 @@ switch get(hsim.popupmenu_Pulse,'Value')
         hsim.axp.colorpulse = temp(3,:);
         hsim.axp.ordinate = cumsum(hsim.sim.g(3,:).').*hsim.sim.dt*hsim.sim.gamma/2/pi - sum(hsim.sim.g(3,:).').*hsim.sim.dt*hsim.sim.gamma/2/pi;
         switch hsim.popupmenu_PulseUnitsselect
-           case 1
-               
-               hsim.axp.Dim2label = ' k_z [1/m]';
-           case 2
-               hsim.axp.ordinate = hsim.axp.ordinate*1e-2;
-               hsim.axp.Dim2label = ' k_z [1/cm]';
-       end
+            case 1
+                
+                hsim.axp.Dim2label = ' k_z [1/m]';
+            case 2
+                hsim.axp.ordinate = hsim.axp.ordinate*1e-2;
+                hsim.axp.Dim2label = ' k_z [1/cm]';
+        end
         Mn = min(hsim.axp.ordinate(:))-eps;
         Mx = max(hsim.axp.ordinate(:))+eps;
         hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
@@ -2068,14 +2529,14 @@ switch hsim.sim.Dim
         set(hsim.axes_Magn,'YTick',linspace(hsim.axm.ordinate_mn,hsim.axm.ordinate_mx,5))
         set(hsim.axes_Magn,'XTick',hsim.axm.Dim1axis,'XTickLabel',hsim.axm.Dim1ticklabel)
         xlabel(hsim.axm.Dim1label)
-   case '0+1D'
+    case '0+1D'
         axes(hsim.axes_Magn)
         
         plot(hsim.axm.ordinate,'linewidth',2)
         axis([1,hsim.sim.Rv,hsim.axm.ordinate_mn,hsim.axm.ordinate_mx])
         set(hsim.axes_Magn,'YTick',linspace(hsim.axm.ordinate_mn,hsim.axm.ordinate_mx,5))
         set(hsim.axes_Magn,'XTick',hsim.axm.Dim1axis,'XTickLabel',hsim.axm.Dim1ticklabel)
-        xlabel(hsim.axm.Dim1label)     
+        xlabel(hsim.axm.Dim1label)
         
     case {'1+1DSI','1+1DRL','1+1DAP','2DAx','2DCo','2DSa','2+1DAx','2+1DCo','2+1DSa','3D','3+1D'}
         axes(hsim.axes_Magn)
@@ -2087,8 +2548,8 @@ switch hsim.sim.Dim
         ylabel(hsim.axm.Dim1label)
         axes(hsim.axes_Colorbar)
         imagesc(permute(hsim.Colmap,[1,2,3])), axis off
-        set(hsim.text1,'Visible','on','string',sprintf('%1.10f',hsim.axm.ordinate_mn))
-        set(hsim.text2,'Visible','on','string',sprintf('%1.10f',hsim.axm.ordinate_mx))
+        set(hsim.text_Mn,'Visible','on','string',sprintf('%1.10f',hsim.axm.ordinate_mn))
+        set(hsim.text_Mx,'Visible','on','string',sprintf('%1.10f',hsim.axm.ordinate_mx))
 end
 
 axes(hsim.axes_Pulse)
@@ -2111,9 +2572,9 @@ switch get(hsim.popupmenu_Pulse,'Value')
         line([1,hsim.nNo],[5.2,5.2],'linewidth',1,'color','black')
 end
 if hsim.nNo > 1
-line([hsim.nNo,hsim.nNo],[min(hsim.axp.ordinate(:))-0.1*abs(min(hsim.axp.ordinate(:))),max(hsim.axp.ordinate(:))+0.1*abs(max(hsim.axp.ordinate(:)))],'linewidth',1,'color','red')
-
-
+    line([hsim.nNo,hsim.nNo],[min(hsim.axp.ordinate(:))-0.1*abs(min(hsim.axp.ordinate(:))),max(hsim.axp.ordinate(:))+0.1*abs(max(hsim.axp.ordinate(:)))],'linewidth',1,'color','red')
+    
+    
 end
 axis([1,hsim.axp.Dim1axis(end),hsim.axp.Dim2axis(1),hsim.axp.Dim2axis(end)])
 set(hsim.axes_Pulse,'XTick',(hsim.axp.Dim1axis),'YTick',hsim.axp.Dim2axis)
