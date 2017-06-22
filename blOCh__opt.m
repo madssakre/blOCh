@@ -976,9 +976,9 @@ try
             end
             try
                 opt1 = Save_Job(spc,khr,opt1);
-                %
                 
-                %
+                
+                
             catch me;Display_Message(['Run_this: Save_Job: ',me.message],2);end
         catch me;Display_Message(sprintf('Run_this: %s: %s',opt1.Method,me.message),2);end
     catch me;Display_Message(['Run_this: Get_Initial_RF: ',me.message],2);end
@@ -2620,9 +2620,9 @@ opt.M_T = opt.M_t(:,end);
 opt.M_T_store(:,opt.k) = opt.M_T;
 
 
-Par.lambda = 2e-6;
+Par.lambda = 1e-7;
 Par.Grad = '1st';
-Par.epsilon = '2e-5';
+Par.epsilon = 5e-3;
 opt.Par = blOCh__khr('Get_NewPar',[],[],[],opt.Par,Par);
 
 

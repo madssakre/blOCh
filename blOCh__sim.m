@@ -992,6 +992,7 @@ else
     set(hsim.slider_freq,'Visible','off','Value',1)
     set(hsim.text_freq,'Visible','off');
     hsim.freqNo = 1;
+    hsim.freq = 0;
 end
 %%
 if hsim.sim.K > 1
@@ -1048,7 +1049,11 @@ List1 = Populate_Listbox(hsim.sim);
 
 set(hsim.listbox1,'String',List1);
 
+%%
+[hsim.colmap.Jet,hsim.colmap.Gray] = GetColormaps;
 
+hsim.Colmap = hsim.colmap.Jet;
+colormap jet
 %%
 
 String = cell(1,9);
@@ -1112,10 +1117,7 @@ hsim.B0inT = 3;
 % edit_B0_Callback;
 
 %%
-[hsim.colmap.Jet,hsim.colmap.Gray] = GetColormaps;
 
-hsim.Colmap = hsim.colmap.Jet;
-colormap jet
 
 hsim = Plotting(hsim);
 
@@ -1131,7 +1133,7 @@ end
 function popupmenu_MagnUnits_Callback(hOb, ed)
 global hsim
 hsim.popupmenu_MagnUnitsselect = get(hsim.popupmenu_MagnUnits,'Value');
-switch hsim.popupmenu_MagnUnitsselect
+switch get(hsim.popupmenu_MagnUnits,'Value')
     case {1,3,5}
         set(hsim.edit_B0,'Visible','off')
     case {2,4,6}
@@ -1255,7 +1257,7 @@ end
 function slider_Tx_Callback(hOb, ed)
 global hsim
 hsim.pTxNo = round(get(hOb, 'Value'));
-hsim.pTxNo
+% hsim.pTxNo
 if hsim.pTxNo == hsim.sim.pTx+1
     set(hsim.text_Tx,'Visible','on','String',sprintf('All %i Tx',hsim.sim.pTx))
 else
@@ -1269,7 +1271,7 @@ function slider_freq_Callback(hOb, ed)
 global hsim
 hsim.freqNo = round(get(hsim.slider_freq, 'Value'));
 set(hsim.slider_freq, 'Value',hsim.freqNo);
-switch hsim.popupmenu_MagnUnitsselect
+switch get(hsim.popupmenu_MagnUnits,'Value')
     case {1,3,5}
         
         set(hsim.text_freq,'String',sprintf('Frequency: %.2f [Hz]',hsim.freq(hsim.freqNo)))
@@ -1330,7 +1332,7 @@ global hsim
 % hsim.nB0inh = round(get(hOb, 'Value'));
 hsim.nB0inh = round(get(hsim.slider_B0,'Value'));
 set(hsim.slider_B0, 'Value',hsim.nB0inh);
-switch hsim.popupmenu_MagnUnitsselect
+switch get(hsim.popupmenu_MagnUnits,'Value')
     case {1,3,5}
         set(hsim.text_B0,'String',sprintf('B0 offset %i of %i (%1.1e Hz)',hsim.nB0inh,hsim.sim.B0inhom_N,hsim.sim.B0inhom_offsets(hsim.nB0inh)))
     case {2,4,6}
@@ -1626,7 +1628,7 @@ switch hsim.sim.Dim
     case '1DSI'
         
         
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case 1
                 hsim.axm.Dim1label = ' z [m]';
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
@@ -1661,7 +1663,7 @@ switch hsim.sim.Dim
     case '1DAP'
         
         hsim.axm.ordinate = squeeze(ordinate);
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case 1
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
                 hsim.axm.Dim1axis = linspace(1,hsim.sim.R(2),5);
@@ -1689,7 +1691,7 @@ switch hsim.sim.Dim
         end
     case '1DRL'
         
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case 1
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
                 hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
@@ -1715,7 +1717,7 @@ switch hsim.sim.Dim
                 hsim.axm.Dim1axis = linspace(1,hsim.sim.R(1),5);
                 hsim.axm.Dim1label = ' x [mm]';
         end
-        %         switch hsim.popupmenu_MagnUnitsselect
+        %         switch get(hsim.popupmenu_MagnUnits,'Value')
         %             case 1
         %             case 2
         %             case 3
@@ -1728,7 +1730,7 @@ switch hsim.sim.Dim
     case '1+1DSI'
         
         
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case 1
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
                 hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
@@ -1778,7 +1780,7 @@ switch hsim.sim.Dim
     case '1+1DAP'
         
         
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case 1
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
                 hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
@@ -1827,7 +1829,7 @@ switch hsim.sim.Dim
         hsim.axm.ordinate = squeeze(ordinate);
     case '1+1DRL'
         
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case 1
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
                 hsim.axm.Dim2ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
@@ -1877,7 +1879,7 @@ switch hsim.sim.Dim
         hsim.axm.ordinate = squeeze(ordinate);
     case '2DAx'
         
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case {1,2}
                 hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
@@ -1904,7 +1906,7 @@ switch hsim.sim.Dim
         
         hsim.axm.ordinate = squeeze(ordinate);
     case '2DCo'
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case {1,2}
                 hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
@@ -1933,7 +1935,7 @@ switch hsim.sim.Dim
         
         hsim.axm.ordinate = squeeze(ordinate);
     case '2DSa'
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case {1,2}
                 hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
@@ -1959,7 +1961,7 @@ switch hsim.sim.Dim
         
         hsim.axm.ordinate = squeeze(ordinate);
     case '2+1DAx'
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case {1,2}
                 hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
@@ -1986,7 +1988,7 @@ switch hsim.sim.Dim
         
         hsim.axm.ordinate = squeeze(ordinate(:,:,:,hsim.freqNo));
     case '2+1DCo'
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case {1,2}
                 hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
@@ -2014,7 +2016,7 @@ switch hsim.sim.Dim
         end
         hsim.axm.ordinate = squeeze(ordinate(:,:,:,hsim.freqNo));
     case '2+1DSa'
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case {1,2}
                 hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,3),hsim.sim.D(2,3),5);
@@ -2039,7 +2041,7 @@ switch hsim.sim.Dim
         end
         hsim.axm.ordinate = squeeze(ordinate(:,:,:,hsim.freqNo));
     case '3D'
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case {1,2}
                 hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
@@ -2062,7 +2064,7 @@ switch hsim.sim.Dim
                 hsim.axm.Dim1label = ' y [mm]';
                 hsim.axm.Dim2label = ' x [mm]';
         end
-        %         switch hsim.popupmenu_MagnUnitsselect
+        %         switch get(hsim.popupmenu_MagnUnits,'Value')
         %             case 1
         %             case 2
         %             case 3
@@ -2073,7 +2075,7 @@ switch hsim.sim.Dim
         
         hsim.axm.ordinate = squeeze(ordinate(:,:,hsim.SlNo,1));
     case '3+1D'
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case {1,2}
                 hsim.axm.Dim2ticklabel = linspace(hsim.sim.D(1,1),hsim.sim.D(2,1),5);
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.D(1,2),hsim.sim.D(2,2),5);
@@ -2098,7 +2100,7 @@ switch hsim.sim.Dim
         end
         hsim.axm.ordinate = squeeze(ordinate(:,:,hsim.SlNo,hsim.freqNo));
     case '0+1D'
-        switch hsim.popupmenu_MagnUnitsselect
+        switch get(hsim.popupmenu_MagnUnits,'Value')
             case {1,3,5}
                 hsim.axm.Dim1ticklabel = linspace(hsim.sim.Dv(1),hsim.sim.Dv(2),5);
                 hsim.axm.Dim1axis = linspace(1,hsim.sim.Rv,5);
@@ -2137,15 +2139,25 @@ switch get(hsim.popupmenu_Pulse,'Value')
             hsim.axp.colorpulse = temp;
         else
             temp = winter(hsim.sim.pTx);
-            hsim.axp.colorpulse = temp(hsim.pTxNo,:);
+            hsim.axp.colorpulse = temp;
         end
-        if hsim.pTxNo == hsim.sim.pTx+1
-            hsim.axp.ordinate = abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+        if hsim.sim.pTx > 1
+            if strcmp(hsim.sim.sim_Tx,'all')
+                hsim.axp.ordinate = abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+            else
+                if hsim.pTxNo == hsim.sim.pTx+1
+                    hsim.axp.ordinate = abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+                else
+                    hsim.axp.ordinate = abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
+                    hsim.axp.colorpulse = hsim.axp.colorpulse(hsim.pTxNo,:);
+                end
+            end
             
         else
-            hsim.axp.ordinate = abs(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
-            
+            hsim.axp.ordinate = abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
         end
+        
+        
         switch hsim.popupmenu_PulseUnitsselect
             case 1
                 hsim.axp.Dim2label = ' |\omega| [rad/s]';
@@ -2171,13 +2183,24 @@ switch get(hsim.popupmenu_Pulse,'Value')
             hsim.axp.colorpulse = temp;
         else
             temp = winter(hsim.sim.pTx);
-            hsim.axp.colorpulse = temp(hsim.pTxNo,:);
+            hsim.axp.colorpulse = temp;
         end
-        if hsim.pTxNo == hsim.sim.pTx+1
-            hsim.axp.ordinate = angle(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+        if hsim.sim.pTx > 1
+            if strcmp(hsim.sim.sim_Tx,'all')
+                hsim.axp.ordinate = angle(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+            else
+                if hsim.pTxNo == hsim.sim.pTx+1
+                    hsim.axp.ordinate = angle(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+                else
+                    hsim.axp.ordinate = angle(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
+                    hsim.axp.colorpulse = hsim.axp.colorpulse(hsim.pTxNo,:);
+                end
+            end
+            
         else
-            hsim.axp.ordinate = angle(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
+            hsim.axp.ordinate = abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
         end
+        
         
         switch hsim.popupmenu_PulseUnitsselect
             case 1
@@ -2205,13 +2228,24 @@ switch get(hsim.popupmenu_Pulse,'Value')
             hsim.axp.colorpulse = temp;
         else
             temp = winter(hsim.sim.pTx);
-            hsim.axp.colorpulse = temp(hsim.pTxNo,:);
+            hsim.axp.colorpulse = temp;
         end
-        if hsim.pTxNo == hsim.sim.pTx+1
-            hsim.axp.ordinate = real(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+        if hsim.sim.pTx > 1
+            if strcmp(hsim.sim.sim_Tx,'all')
+                hsim.axp.ordinate = real(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+            else
+                if hsim.pTxNo == hsim.sim.pTx+1
+                    hsim.axp.ordinate = real(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+                else
+                    hsim.axp.ordinate = real(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
+                    hsim.axp.colorpulse = hsim.axp.colorpulse(hsim.pTxNo,:);
+                end
+            end
+            
         else
-            hsim.axp.ordinate = real(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
+            hsim.axp.ordinate = abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
         end
+        
         switch hsim.popupmenu_PulseUnitsselect
             case 1
                 hsim.axp.Dim2label = ' Re(\omega) [rad/s]';
@@ -2239,13 +2273,24 @@ switch get(hsim.popupmenu_Pulse,'Value')
             hsim.axp.colorpulse = temp;
         else
             temp = winter(hsim.sim.pTx);
-            hsim.axp.colorpulse = temp(hsim.pTxNo,:);
+            hsim.axp.colorpulse = temp;
         end
-        if hsim.pTxNo == hsim.sim.pTx+1
-            hsim.axp.ordinate = imag(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+        if hsim.sim.pTx > 1
+            if strcmp(hsim.sim.sim_Tx,'all')
+                hsim.axp.ordinate = imag(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+            else
+                if hsim.pTxNo == hsim.sim.pTx+1
+                    hsim.axp.ordinate = imag(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+                else
+                    hsim.axp.ordinate = imag(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
+                    hsim.axp.colorpulse = hsim.axp.colorpulse(hsim.pTxNo,:);
+                end
+            end
+            
         else
-            hsim.axp.ordinate = imag(complex(hsim.sim.uo(hsim.pTxNo,:,hsim.kpNo),hsim.sim.vo(hsim.pTxNo,:,hsim.kpNo))).';
+            hsim.axp.ordinate = abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
         end
+        
         switch hsim.popupmenu_PulseUnitsselect
             case 1
                 hsim.axp.Dim2label = ' Im(\omega) [rad/s]';
@@ -2576,7 +2621,7 @@ if hsim.nNo > 1
     
     
 end
-axis([1,hsim.axp.Dim1axis(end),hsim.axp.Dim2axis(1),hsim.axp.Dim2axis(end)])
+axis([1,hsim.axp.Dim1axis(end),min(min(hsim.axp.ordinate(:)),hsim.axp.Dim2axis(1)),max(max(hsim.axp.ordinate(:)),hsim.axp.Dim2axis(end))])
 set(hsim.axes_Pulse,'XTick',(hsim.axp.Dim1axis),'YTick',hsim.axp.Dim2axis)
 set(hsim.axes_Pulse,'XTickLabel',round(hsim.axp.Dim1ticklabel),'YTickLabel',hsim.axp.Dim2ticklabel)
 xlabel(hsim.axp.Dim1label)
