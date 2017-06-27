@@ -620,7 +620,8 @@ WHratio = WHratio(3)/WHratio(4);
 set(hsim.fig,'Units','normalized')
 
 %%
-
+[hsim.colmap.Jet,hsim.colmap.Gray] = GetColormaps;
+%%
 
 
 clear varargin
@@ -1050,7 +1051,7 @@ List1 = Populate_Listbox(hsim.sim);
 set(hsim.listbox1,'String',List1);
 
 %%
-[hsim.colmap.Jet,hsim.colmap.Gray] = GetColormaps;
+
 
 hsim.Colmap = hsim.colmap.Jet;
 colormap jet
