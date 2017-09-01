@@ -1273,7 +1273,7 @@ if ~isempty(n)
         switch opt.Par.Grad
             case 'Schirmer'
                 
-                [Gu,Gv] =    Get_pTx_u_v_Schirmer_Gradients(opt.u,opt.v,opt.M_t,opt.L_t,opt.g,opt.yx,opt.yy,opt.yz,spc.pTx,opt.sr,opt.si,opt.w0,opt.dt,n);
+                [Gu,Gv] =    Get_pTx_u_v_Schirmer_Gradients(opt.u,opt.v,opt.M_t,opt.L_t,opt.g,opt.yx,opt.yy,opt.yz,spc.pTx,opt.sr,opt.si,opt.w0,opt.dt,n,opt.par_Ncores,opt.par_Type);
                 
             case '1st'
                 [Gu,Gv] = Get_pTx_u_v_1st_Gradients(opt.M_t,opt.L_t,opt.sr,opt.si,spc.pTx,n);
