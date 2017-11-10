@@ -1,8 +1,8 @@
                                        blOCh 
                                        
-                                    Version 5.0
+                                    Version 5.1
 
-                                   2017 April 26
+                                   2017 Nov 10
 
 
 1.0 CONTENTS
@@ -76,7 +76,7 @@ doi: 10.1063/1.4739755
 	Besides myself blOCh receives invaluable support development from
 	
 	Dr. Ivan I. Maximov
-	MSc. David Goodwin
+	Dr. David Goodwin
 		
 
 

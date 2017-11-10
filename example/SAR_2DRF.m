@@ -32,10 +32,10 @@ clc
 %
 M0 = ''; % Default equilibrium magnetization
 Md = ''; % Default deisred magnetization described by the following:
-TH = [0.02,0.01]; % desired magnetization square box size [m]
+TH = [0.01,0.01]; % desired magnetization square box size [m]
 c_TH = [-34.5060e-3,0]; % center of box
-R = 10; % spatial grid size [#]
-Mdflip = [45,0]; % desired flip angle and flip phase [degrees]
+R = 25; % spatial grid size [#]
+Mdflip = [90,0]; % desired flip angle and flip phase [degrees]
 
 L = [0.2,0.2]; % FOX [m]
 r0 = [-34.5060e-3,0,0]; % centering of FOX
@@ -65,7 +65,7 @@ Par.Constr.Dutycycle = 0.1; % intended duty cycle
 
 Par.Constr.SARlocal.Type = 'nlc';  % non linear constraint
 Par.Constr.SARlocal.Lim = 8; % limit value
-Par.Constr.SARlocal.Nvop  = -1; % use all available VOPs
+Par.Constr.SARlocal.Nvop  = -1; % -1: use all available VOPs. For debugging purposes specify a number much lower than the number of VOPs
 Par.Constr.SARlocal.Unit = 'W/kg'; % unit of limit
 Par.Constr.SARlocal.FreeIterations = 10; % number of iterations free from haulting
 
@@ -90,10 +90,10 @@ Par.Constr.RFave.FreeIterations = 10;
 % what to save during and after optimization. See describtion of subfunction 
 % 'Save_Job" in blOCh__opt.m
 
-Save = '111111';
+Save = struct('Bundle','reduced','Data','all@end','Controls','all@end','Figures','all','Scripts','Main');
 
 
-MaxIter = 3; % number of iterations
+MaxIter = 30; % number of iterations
 
 % How to cope with constraints:
 %
@@ -116,7 +116,14 @@ Par.Constr.RFave.Cope = 'Monitor';
 
 % now run the optimization
 opt = blOCh__opt([],spc,khr,Method,Par,'dt',10e-6,'Init','Random','Handover',0,'TolFun',1e-6,...
-    'TolX',1e-6,'MaxIter',MaxIter,'Save',Save,'Mask',0,'deriv_check','off','par_Ncores',1,'par_Type',1,'Show',1);
+    'TolX',1e-6,'MaxIter',MaxIter,'Save',Save,'Mask',0,'deriv_check','off','par_Ncores',3,'par_Type',1,'Show',1);
 %%
 % finally simulate on a finer grid (spc2)
 sim = blOCh__sim([],spc2,khr,opt,'Show',1);
+% and save this with the simulation and the finer detailed spatial grid
+% (spc2)
+% NB: notice how the internal function inside blOCh__opt is called from
+% outside. The first four empty are necessary, and the last four entries
+% are what's needed for Save_Job(). It is also possible to specify output,
+% ie. opt = blOCh__opt('Save_Job',[],[],[],[],spc2,khr,opt,sim);
+blOCh__opt('Save_Job',[],[],[],[],spc2,khr,opt,sim)

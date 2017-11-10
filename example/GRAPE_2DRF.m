@@ -59,7 +59,7 @@ Method = {'GRAPE_Khaneja'};
 % what to save during and after optimization. See describtion of subfunction 
 % 'Save_Job" in blOCh__opt.m
 
-Save = '000000';
+Save = struct('Bundle','reduced','Data','all@end','Controls','all@end','Figures','all','Scripts','Main+blOCh');
 
 MaxIter = 30; % number of iterations
 
@@ -81,3 +81,10 @@ opt = blOCh__opt([],spc,khr,Method,Par,'dt',10e-6,'Init',Init,'Handover',0,'TolF
 %%
 % finally simulate on a finer grid (spc2)
 sim = blOCh__sim([],spc2,khr,opt,'Show',1);
+% and save this with the simulation and the finer detailed spatial grid
+% (spc2)
+% NB: notice how the internal function inside blOCh__opt is called from
+% outside. The first four empty are necessary, and the last four entries
+% are what's needed for Save_Job(). It is also possible to specify output,
+% ie. opt = blOCh__opt('Save_Job',[],[],[],[],spc2,khr,opt,sim);
+blOCh__opt('Save_Job',[],[],[],[],spc2,khr,opt,sim)

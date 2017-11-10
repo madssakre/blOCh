@@ -59,9 +59,9 @@ Method = {'GRAPE_Khaneja','QN_LBFGS'};
 % what to save during and after optimization. See describtion of subfunction 
 % 'Save_Job" in blOCh__opt.m
 
-Save = '000000';
+Save = struct('Bundle','reduced','Data','intermediate+last','Controls','intermediate+last','Figures','all','Scripts','Main');
 
-MaxIter = [10,5]; % number of iterations
+MaxIter = [10,10]; % number of iterations
 
 % parameters according to Vinding_JCP2012
 Par1.lambda = 1e-7;
@@ -94,6 +94,13 @@ Init = 'Random';
 opt = blOCh__opt([],spc,khr,Method,Par,'dt',10e-6,'Init',Init,'Handover',1,'TolFun',[1e-7,1e-6],...
     'TolX',[1e-7,1e-6],'MaxIter',MaxIter,'Save',Save,'Mask',0,'deriv_check','off','par_Ncores',1,'par_Type',1,'Show',0);
 %%
-% finally simulate on a finer grid (spc2)
+% finally simulate on a finer spatial grid (spc2)
 %
 sim = blOCh__sim([],spc2,khr,opt,'Show',1);
+% and save this with the simulation and the finer detailed spatial grid
+% (spc2)
+% NB: notice how the internal function inside blOCh__opt is called from
+% outside. The first four empty are necessary, and the last four entries
+% are what's needed for Save_Job(). It is also possible to specify output,
+% ie. opt = blOCh__opt('Save_Job',[],[],[],[],spc2,khr,opt,sim);
+blOCh__opt('Save_Job',[],[],[],[],spc2,khr,opt,sim)

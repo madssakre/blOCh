@@ -62,7 +62,7 @@ if isempty(Fun)
     
     def_Show = 1;
     
-    def_Save = '000000';
+    def_Save = struct('Bundle','reduced','Data','last','Controls','last','Figures','opt','Scripts','Main');
     
     def_Init = {'Random',NaN};
     
@@ -448,35 +448,46 @@ function test = Validate_Init(x)
 
 test = false;
 if iscell(x)
-    
-    if numel(x) == 2;
+    if numel(x) == 3
+        
         x1 = x{1};
         x2 = x{2};
+        x3 = x{3};
         
         if ischar(x1)
-            
             switch x1
-                
                 case {'Random','0s'}
-                    
                     test = true;
                     % Doesn't care what x2 might be...
                 otherwise
                     if exist(x1,'file')
-                        if isnumeric(x2)
-                            if isnan(x2)
-                                test = true;
-                            elseif x2 > 0
-                                if rem(x2,2) == 0
-                                    test = true;
-                                end
-                            end
-                        elseif ischar(x2)
+                        if ischar(x2)
                             switch x2
-                                case 'opt1best'
-                                    test = true;
-                                case 'opt2best'
-                                    test = true;
+                                case 'opt1'
+                                    if ischar(x3)
+                                        switch x3
+                                            case 'best'
+                                                test = true;
+                                            case 'last'
+                                                test = true;
+                                        end
+                                    elseif isnumeric(x3)
+                                        test = true;
+                                    end
+                                    
+                                case 'opt2'
+                                    if ischar(x3)
+                                        switch x3
+                                            case 'best'
+                                                test = true;
+                                            case 'last'
+                                                test = true;
+                                        end
+                                    elseif isnumeric(x3)
+                                        test = true;
+                                    end
+                                otherwise
+                                    return
                             end
                         else
                             return
@@ -486,43 +497,17 @@ if iscell(x)
             
         end
         
-    elseif numel(x) == 1
-        
-        x = x{1};
-        
-        switch x
-            
-            case {'Random','0s'}
-                
-                test = true;
-                
-            otherwise
-                
-                if exist(x,'file')
-                    test = true;
-                end
-                
-        end
-        
     end
 elseif ischar(x)
-    
     switch x
-        
         case {'Random','0s'}
-            
             test = true;
-            
         otherwise
             
             if exist(x,'file')
                 test = true;
             end
-            
     end
-    
-    
-    
 end
 
 
@@ -535,33 +520,74 @@ end
 
 function test = Validate_Save(x)
 
-test = false;
+OK = zeros(5,1);
 
-nn = numel(x);
-nvalid = 6;
-if nn ~= nvalid
-    error('Save must be %i characters',nvalid)
-end
-
-t1 = {'0','1','2'};
-t2 = {'0','1','2'};
-t3 = {'0','1','2','3','4','5'};
-t4 = {'0','1'};
-t5 = {'0','1'};
-t6 = {'0','1','2'};
-
-
-OK = zeros(1,nvalid);
-
-for n = 1:nvalid
+if isstruct(x)
     
-    t = eval(['t',num2str(n)]);
-    fun = @(xx)any(strcmpi(xx,t));
-    OK(n) = fun(x(n));
+    if isfield(x,'Bundle')
+        
+        switch x.Bundle
+            case {'reduced','none'}
+                OK(1) = 1;
+            otherwise
+                OK(1) = 0;
+        end
+    else
+        OK(1) = 1;
+    end
+    if isfield(x,'Data')
+        
+        switch x.Data
+            case {'last','intermediate','all@end','intermediate+last','none'}
+                OK(2) = 1;
+            otherwise
+                OK(2) = 0;
+        end
+    else
+        OK(2) = 1;
+    end
+    if isfield(x,'Controls')
+        
+        switch x.Controls
+            case {'last','intermediate','all@end','intermediate+last','none'}
+                OK(3) = 1;
+            otherwise
+                OK(3) = 0;
+        end
+    else
+        OK(3) = true;
+    end
+    if isfield(x,'Figures')
+        
+        switch x.Figures
+            case {'all','opt','none'}
+                OK(4) = 1;
+            otherwise
+                OK(4) = 0;
+        end
+    else
+        OK(4) = 1;
+    end
+    
+    if isfield(x,'Scripts')
+        
+        switch x.Scripts
+            case {'Main','Main+blOCh','none'}
+                OK(5) = 1;
+            otherwise
+                OK(5) = 0;
+        end
+    else
+        OK(5) = 1;
+    end
+    
+else
+    return
+    
+    
 end
-OK = sum(OK);
 
-if OK == nvalid
+if sum(OK) == 5
     test = true;
 end
 
@@ -576,11 +602,11 @@ if opt.OptNum == 1
     if iscell(Init)
         
         
-        if numel(Init) == 2
+        if numel(Init) == 3
             
             I1 = Init{1};
             I2 = Init{2};
-            
+            I3 = Init{3};
             switch I1
                 case 'Random'
                     [opt.u,opt.v,opt.uo,opt.vo] = Get_Random_RF(spc.pTx,opt.Non,opt.mon,opt.N,opt.RFipct/100*khr.RFmHW,opt.MaxIter);
@@ -590,23 +616,7 @@ if opt.OptNum == 1
                     
                 otherwise
                     
-                    [opt.u,opt.v,opt.uo,opt.vo,Msg,Nfo] = Load_RF(I1,I2,opt,spc.pTx);
-                    
-            end
-            
-        elseif numel(Init) == 1
-            I1 = Init{1};
-            I2 = NaN;
-            switch I1
-                case 'Random'
-                    [opt.u,opt.v,opt.uo,opt.vo] = Get_Random_RF(spc.pTx,opt.Non,opt.mon,opt.N,opt.RFipct/100*khr.RFmHW,opt.MaxIter);
-                    
-                case '0s'
-                    [opt.u,opt.v,opt.uo,opt.vo] = Get_0s_RF(spc.pTx,opt.Non,opt.mon,opt.N,opt.RFipct/100*khr.RFmHW,opt.MaxIter);
-                    
-                otherwise
-                    
-                    [opt.u,opt.v,opt.uo,opt.vo,Msg,Nfo] = Load_RF(I1,I2,opt,spc.pTx);
+                    [opt.u,opt.v,opt.uo,opt.vo,Msg,Nfo] = Load_RF(I1,I2,I3,opt,spc.pTx);
                     
             end
         end
@@ -627,7 +637,7 @@ if opt.OptNum == 1
                 
                 
             otherwise
-                [opt.u,opt.v,opt.uo,opt.vo,Msg,Nfo] = Load_RF(Init,NaN,opt,spc.pTx);
+                [opt.u,opt.v,opt.uo,opt.vo,Msg,Nfo] = Load_RF(Init,'opt1','last',opt,spc.pTx);
                 
                 
         end
@@ -687,7 +697,7 @@ wyo(:,:,1) = wy;
 
 end
 
-function [wx,wy,wxo,wyo,Msg,Nfo] = Load_RF(I1,I2,opt,pTx)
+function [wx,wy,wxo,wyo,Msg,Nfo] = Load_RF(I1,I2,I3,opt,pTx)
 N = opt.N;
 K = opt.MaxIter;
 [pathstr, name, extension] = fileparts(I1);
@@ -700,54 +710,70 @@ switch extension
         
         old = load(I1,'-mat');
         
-        if isfield(old,'opt')
+        if isfield(old,'opt') && ischar(I2) && ischar(I3)
             
-            names = fieldnames(old.opt);
             
-            if numel(names) == 1
-                names = names{1};
-                if isfield(eval(sprintf('old.opt.%s',names)),'uo') && isfield(eval(sprintf('old.opt.%s',names)),'vo')
-                    
-                    if ischar(I2)
-                        
-                        switch I2
-                            case 'best'
-                                [Mx,idx] = max(eval(sprintf('old.opt.%s.Fun(:)',names)));
-                                
-                                wx_ = eval(sprintf('old.opt.%s.uo(:,:,%i)',names,idx));
-                                wy_ = eval(sprintf('old.opt.%s.vo(:,:,%i)',names,idx));
-                        end
-                        
-                    elseif isnumeric(I2)
-                        
-                        if isnan(I2)
-                            
-                            [Mx,idx] = max(eval(sprintf('old.opt.%s.Fun(:)',names)));
-                            
-                            wx_ = eval(sprintf('old.opt.%s.uo(:,:,%i)',names,idx));
-                            wy_ = eval(sprintf('old.opt.%s.vo(:,:,%i)',names,idx));
-                            
-                        else
-                            [A,B,C] = size(eval(sprintf('old.opt.%s.uo',names)));
-                            
-                            if I2 > C,I2 = C;
-                            end
-                            wx_ = eval(sprintf('old.opt.%s.uo(:,:,%i)',names,I2));
-                            wy_ = eval(sprintf('old.opt.%s.vo(:,:,%i)',names,I2));
-                        end
-                        
-                    end
-                    
-                else
-                    Msg = sprintf('Init bundle opt.%s doesn''t contain uo and vo',names);
-                end
+            if isfield(old.opt,'opt1') && strcmp(I2,'opt1')
+                
+                oldopt = old.opt.opt1;
+                
+            elseif isfield(old.opt,'opt2') && strcmp(I2,'opt2')
+            
+                oldopt = old.opt.opt2;
+                
             else
-                Msg = sprintf('Init opt struct contains multiple structs');
+                
+               error('Load_RF: At present, the following RF initializations (with a cell array) exist: ''Init'' = {*.bnd,''opt1'',''best''}, {*.bnd,''opt1'',''last''}, {*.bnd,''opt2'',''best''}, {*.bnd,''opt1'',''last''},\n {*.bnd,''opt1'',#}, and {*.bnd,''opt2'',#}, where # is a number less than or equal to the maximum number of iterations in the given optimiztion')
+                 
             end
             
-        else
-            Msg = sprintf('Init bundle misses an opt struct');
+            if strcmp(I3,'best')
+                [Mx,idx] = max(oldopt.Fun);
+                
+                wx_= oldopt.uo(:,:,idx);
+                wy_= oldopt.vo(:,:,idx);
+                                
+            elseif strcmp(I3,'last')
+                
+                
+                wx_= oldopt.uo(:,:,end);
+                wy_= oldopt.vo(:,:,end);
+                
+            else
+                error('Load_RF: At present, the following RF initializations (with a cell array) exist: ''Init'' = {*.bnd,''opt1'',''best''}, {*.bnd,''opt1'',''last''}, {*.bnd,''opt2'',''best''}, {*.bnd,''opt1'',''last''},\n {*.bnd,''opt1'',#}, and {*.bnd,''opt2'',#}, where # is a number less than or equal to the maximum number of iterations in the given optimiztion')
+               
+            end
+            
+            
+        elseif isfield(old,'opt') && ischar(I2) && isnumeric(I3)
+            
+            if isfield(old.opt,'opt1') && strcmp(I2,'opt1')
+                
+                oldopt = old.opt.opt1;
+                
+            elseif isfield(old.opt,'opt2') && strcmp(I2,'opt2')
+            
+                oldopt = old.opt.opt2;
+                
+            else
+                
+               error('Load_RF: At present, the following RF initializations (with a cell array) exist: ''Init'' = {*.bnd,''opt1'',''best''}, {*.bnd,''opt1'',''last''}, {*.bnd,''opt2'',''best''}, {*.bnd,''opt1'',''last''},\n {*.bnd,''opt1'',#}, and {*.bnd,''opt2'',#}, where # is a number less than or equal to the maximum number of iterations in the given optimiztion')
+                
+            end
+            
+            
+            if I3 <= size(oldopt.uo,3)
+                wx_= oldopt.uo(:,:,I3);
+                wy_= oldopt.vo(:,:,I3);
+            else
+                error('Load_RF: At present, the following RF initializations (with a cell array) exist: ''Init'' = {*.bnd,''opt1'',''best''}, {*.bnd,''opt1'',''last''}, {*.bnd,''opt2'',''best''}, {*.bnd,''opt1'',''last''},\n {*.bnd,''opt1'',#}, and {*.bnd,''opt2'',#}, where # is a number less than or equal to the maximum number of iterations in the given optimiztion')
+               
+            end
+            
+            
         end
+            
+           
         
     case {'txt','.txt'}
         
@@ -768,7 +794,8 @@ switch extension
         
         
     otherwise
-        
+        error('Load_RF: At present, the following RF initializations (with a character array) exist: ''Init'' = ''*.txt'' where the ascii text file contains columns with the following convention u(s=1),...,u(s=pTx),v(s=1),...,v(s=pTx), and each row is a time-point')
+               
 end
 
 wx = zeros(pTx,N);
@@ -1837,203 +1864,216 @@ function opt = Save_Job(spc,khr,opt,varargin)
 %
 %   Stores the different structures, and prints output to a datafile
 %   All dependent on the choices described below.
-%
-%   If:
-%       opt.Save =   0;     Stores nothing
-%       opt.Save =   ABCDEF;
-%       A = 1: matlab mat-file with reduced spc,khr,opt and sim-structs
-%       A = 2: matlab mat-file with complete spc,khr,opt and sim-structs
-%       B = 1: ascii txt-file with important data values stored in the end of an optimization instance
-%       B = 2: ascii txt-file with important data values stored every ksaveintermediate iteration
-%       C = 1: ascii txt-file of the last controls stored in the end of an optimization instance
-%       C = 2: ascii txt-file of the controls stored every ksaveintermediate iteration
-%       C = 3: ascii controls txt-file of the controls stored every ksaveintermediate iteration and the last controls stored in the end of an optimization instance
-%       C = 4: ascii controls txt-file of the controls stored every ksaveintermediate iteration and all the controls stored in the end of an optimization instance
-%       C = 5: ascii txt-file of all the controls stored in the end of an optimization instance
-%       D = 1: png images of displayed figures
-%       E = 1: system specific control files ... well not supported yet.
-%       F = 1: Saves the main script from which the optimization is run.
-%       F = 2: As with F=1, but also a zip of the folder with the blOCh
-%       scripts, but not package scripts yet.
+% 
+% Save.Bundle = 'reduced' (default and at present only option for saving a bundle with spc, khr, opt, and sim)
+% Save.Data = 'last' (default), 'all@end', 'intermediate', 'intermediate+last' , or 'none'
+%               Key data are stored for the last iteration, or for all
+%               iterations in the end of the optimization, intermediately
+%               for progress monitoring, or intermediate and for the last
+%               iteration.
+% Save.Controls = 'last' (default), 'all@end', 'intermediate','intermediate+last', or 'none'
+%               Controls are store d for the last iteration, or for all
+%               iterations in the end of the optimization, intermediately
+%               for progress monitoring, or intermediate and for the last
+%               iteration.
+% Save.Figures = 'opt' (default), 'all', or 'none'
+%               Tries to store plotted images if they exist for the
+%               optimization or for all blOCh sections
+% Save.Scripts = 'Main', Main+blOCh', or 'none'
+%               Saves a copy of the Main scripts that was used to run
+%               blOCh, or it also stores the blOCh scripts for later
+%               reference.
+    
 
-if sum(str2num(opt.Save)) > 0
+if length(varargin) >= 1 && ~isempty(varargin{1})
     
-    SaveThis = SaveThis(opt.Save);
-    
-    Type = My_Type(opt);
-    
-    if length(varargin) >= 1
-        if isstruct(varargin{1})
-            sim = varargin{1};
-            AppendName = '_sim';
-        else
-            sim = [];
-            AppendName = '';
-        end
+    if isstruct(varargin{1})
+        sim = varargin{1};
+        AppendName = '_sim';
     else
         sim = [];
         AppendName = '';
     end
     
-    % About bundles
+else
     
-    if numel(SaveThis) >=1
-        if SaveThis(1) > 0
-            
-            opt.Folder_bnd = [opt.Save2,opt.TimeStamp,filesep,'bundles',filesep];
-            opt.File_bnd = sprintf('%s%s_on%i.bnd',Type,AppendName,opt.OptNum);
-        end
-    end
-    
-    % abouyt ascii data
-    
-    if numel(SaveThis) >=2
-        
-        if opt.Go
-            if SaveThis(2) == 2
-                opt.Folder_dat = [opt.Save2,opt.TimeStamp,filesep,'data',filesep];
-                opt.File_dat_intermediate = sprintf('%s%s_ik%04.f.txt',Type,AppendName,opt.k);
-                opt.Hdr_dat_intermediate = sprintf('%s%s_ik%04.f_hdr.txt',Type,AppendName,opt.k);
-            end
-        else
-            if SaveThis(2) >= 1
-                opt.Folder_dat = [opt.Save2,opt.TimeStamp,filesep,'data',filesep];
-                opt.File_dat = sprintf('%s%s_on%i.txt',Type,AppendName,opt.OptNum);
-                opt.Hdr_dat = sprintf('%s%s_on%i_hdr.txt',Type,AppendName,opt.OptNum);
-            end
-        end
-        
-        
-    end
-    
-    % about ascii controls
-    
-    if numel(SaveThis) >=3
-        
-        if opt.Go
-            
-            
-            if SaveThis(3) == 2 || SaveThis(3) == 3 || SaveThis(3) == 4
-                
-                opt.Folder_ctrl = [opt.Save2,opt.TimeStamp,filesep,'controls',filesep];
-                
-                opt.File_ctrl_RF_intermediate  = sprintf('%s%s_on%i_ik%04.f.rf.txt',Type,AppendName,opt.OptNum,opt.k);
-                
-            end
-            
-            
-        else
-            
-            if SaveThis(3) == 1 || SaveThis(3) == 3
-                
-                opt.Folder_ctrl = [opt.Save2,opt.TimeStamp,filesep,'controls',filesep];
-                
-                opt.File_ctrl_RF_last = sprintf('%s%s_on%i_last.rf.txt',Type,AppendName,opt.OptNum);
-                
-            end
-            
-            if SaveThis(3) == 4 || SaveThis(3) == 5
-                
-                rfx = opt.uo;
-                rfy = opt.vo;
-                
-                [A,B,C] = size(rfx);
-                
-                opt.Folder_ctrl = [opt.Save2,opt.TimeStamp,filesep,'controls',filesep];
-                opt.File_ctrl_RF_all = cell(C,1);
-                for c = 1:C
-                    opt.File_ctrl_RF_all{c} = sprintf('%s%s_%i_k%04.f.rf.txt',Type,AppendName,opt.OptNum,c);
-                end
-            end
-        end
-        
-        
-        
-        
-    end
-    
-    % about pngs
-    
-    opt.Folder_pics = [opt.Save2,opt.TimeStamp,filesep,'pics',filesep];
-    
-    if numel(SaveThis) >=4
-        
-        if SaveThis(4)
-            
-            opt.File_pic_khr = sprintf('khr_%s%s_on%i.png',Type,AppendName,opt.OptNum);
-            opt.File_pic_spc = sprintf('spc_%s%s_on%i.png',Type,AppendName,opt.OptNum);
-            opt.File_pic_opt = sprintf('opt_%s%s_on%i.png',Type,AppendName,opt.OptNum);
-            opt.File_pic_sim = sprintf('sim_%s%s_on%i.png',Type,AppendName,opt.OptNum);
-        end
-    end
-    
-    % about system related files
-    % not supported yet
-%     if numel(SaveThis) >= 5
-%         if SaveThis(5)
-%             opt.Folder_sys = [opt.Save2,opt.TimeStamp,filesep,'sys',filesep];
-%             opt.File_system_RF  = sprintf('%s%s_on%i_k%04.f',Type,AppendName,opt.OptNum,opt.k);
-%         end
-%         
-%     end
-    
-    % abouts main and scripts files
-    
-    if numel(SaveThis) >=6
-        if SaveThis(6)
-            opt.Folder_scripts = [opt.Save2,opt.TimeStamp,filesep,'scripts',filesep];
-        end
-        
-    end
-    %% Figures
-    % NB: This must appear before Save_Bundle because it erases the
-    % fig-handles from spc and khr.
-    try
-        Save_Figures(spc,khr,opt,sim,SaveThis);
-    catch me;Msg = ['Save_Job ',me.message];
-        Display_Message(Msg,2);
-    end
-    %% Bundle
-    try
-        Save_Bundle(spc,khr,opt,sim,SaveThis);
-    catch me;Msg = ['Save_Job ',me.message];
-        Display_Message(Msg,2);
-    end
-    
-    
-    %% Data
-    try
-        Save_Data(spc,khr,opt,sim,SaveThis);
-    catch me;Msg = ['Save_Job ',me.message];
-        Display_Message(Msg,2);
-    end
-    %% Controls
-    try
-        Save_Controls(spc,khr,opt,sim,SaveThis);
-    catch me;Msg = ['Save_Job ',me.message];
-        Display_Message(Msg,2);
-    end
-    
-    %% System specific
-%     try
-%         Save_System(spc,khr,opt,sim,SaveThis);
-%     catch me;Msg = ['Save_Job ',me.message];
-%         Display_Message(Msg,2);
-%     end
-    %% Scripts
-    try
-        Save_Scripts(spc,khr,opt,sim,SaveThis);
-    catch me;Msg = ['Save_Job ',me.message];
-        Display_Message(Msg,2);
-    end
-    %    %% Remove what cannot exist for next optimization
-    
+    sim = [];
+    AppendName = '';
     
 end
+
+
+Type = My_Type(opt);
+
+
+
+% About bundles
+if ~isfield(opt,'Folder_bnd')
+    if ~strcmp(opt.Save.Bundle,'none')
+        opt.Folder_bnd = [opt.Save2,opt.TimeStamp,filesep,'bundles',filesep];
+        if ~exist(opt.Folder_bnd,'dir')
+            mkdir(opt.Folder_bnd)
+        end
+    end
+end
+if strcmp(opt.Save.Bundle,'reduced') && ~opt.Go
+    
+    opt.File_bnd = sprintf('%s%s_on%i.bnd',Type,AppendName,opt.OptNum);
+    try
+        Save_Bundle(spc,khr,opt,sim,'reduced');
+    catch me;Msg = ['Save_Job ',me.message];
+        Display_Message(Msg,2);
+    end
+end
+
+% about Data
+if ~isfield(opt,'Folder_dat')
+    if ~strcmp(opt.Save.Data,'none')
+        opt.Folder_dat = [opt.Save2,opt.TimeStamp,filesep,'data',filesep];
+        if ~exist(opt.Folder_dat,'dir')
+            mkdir(opt.Folder_dat)
+        end
+    end
+end
+if contains(opt.Save.Data,'last') && ~opt.Go
+    opt.File_dat = sprintf('%s%s_on%i.txt',Type,AppendName,opt.OptNum);
+    opt.Hdr_dat = sprintf('%s%s_on%i_hdr.txt',Type,AppendName,opt.OptNum);
+    
+    try
+        Save_Data(opt,'last');
+    catch me;Msg = ['Save_Job ',me.message];
+        Display_Message(Msg,2);
+    end
+    
+end
+if contains(opt.Save.Data,'all') && contains(opt.Save.Data,'end') && ~opt.Go
+    opt.File_dat = sprintf('%s%s_on%i.txt',Type,AppendName,opt.OptNum);
+    opt.Hdr_dat = sprintf('%s%s_on%i_hdr.txt',Type,AppendName,opt.OptNum);
+    
+    try
+        Save_Data(opt,'all');
+    catch me;Msg = ['Save_Job ',me.message];
+        Display_Message(Msg,2);
+    end
+    
+end
+if contains(opt.Save.Data,'intermediate') && opt.Go && mod(opt.k,opt.ksaveintermediate) == 0
+    opt.File_dat_intermediate = sprintf('%s%s_ik%04.f.txt',Type,AppendName,opt.k-1);    
+    try
+        Save_Data(opt,'intermediate');
+    catch me;Msg = ['Save_Job ',me.message];
+        Display_Message(Msg,2);
+    end
+end
+
+
+
+
+% controls
+if ~isfield(opt,'Folder_ctrl')
+    if ~strcmp(opt.Save.Controls,'none')
+        opt.Folder_ctrl = [opt.Save2,opt.TimeStamp,filesep,'controls',filesep];
+        if ~exist(opt.Folder_ctrl,'dir')
+            mkdir(opt.Folder_ctrl)
+        end
+    end
+end
+if contains(opt.Save.Controls,'last')  && ~opt.Go
+    opt.File_ctrl_RF_last = sprintf('%s%s_on%i_last.rf.txt',Type,AppendName,opt.OptNum);
+    try
+        Save_Controls(opt,'last');
+    catch me;Msg = ['Save_Job ',me.message];
+        Display_Message(Msg,2);
+    end
+end
+if contains(opt.Save.Controls,'all') && contains(opt.Save.Controls,'end') && ~opt.Go
+    if isfield(opt,'opt1')
+        K = size(opt.opt1.uo,3);
+    elseif isfield(opt,'opt2')
+        K = size(opt.opt2.uo,3);
+    else
+        K = size(opt.uo,3);
+    end
+    opt.File_ctrl_RF_all = cell(K,1);
+    for c = 1:K
+        opt.File_ctrl_RF_all{c} = sprintf('%s%s_on%i_k%04.f.rf.txt',Type,AppendName,opt.OptNum,c-1);
+    end
+    opt.File_ctrl_RF_all_zip = sprintf('%s%s_on%i_k%04.f-.%04.f.rf.txt',Type,AppendName,opt.OptNum,0,K-1);
+    try
+        Save_Controls(opt,'all');
+    catch me;Msg = ['Save_Job ',me.message];
+        Display_Message(Msg,2);
+    end
+    
+end
+if contains(opt.Save.Controls,'intermediate')  && opt.Go && mod(opt.k,opt.ksaveintermediate) == 0
+    opt.File_ctrl_RF_intermediate  = sprintf('%s%s_on%i_ik%04.f.rf.txt',Type,AppendName,opt.OptNum,opt.k-1);
+    try
+        Save_Controls(opt,'intermediate');
+    catch me;Msg = ['Save_Job ',me.message];
+        Display_Message(Msg,2);
+    end
+end
+% figures
+if ~isfield(opt,'Folder_pics')
+    if ~strcmp(opt.Save.Figures,'none')
+        opt.Folder_pics = [opt.Save2,opt.TimeStamp,filesep,'pics',filesep];
+        if ~exist(opt.Folder_pics,'dir')
+            mkdir(opt.Folder_pics)
+        end
+    end
+end
+
+if strcmp(opt.Save.Figures,'opt') && ~opt.Go
+    opt.File_pic_opt = sprintf('opt_%s%s_on%i.png',Type,AppendName,opt.OptNum);
+    try
+        Save_Figures(spc,khr,opt,sim);
+    catch me;Msg = ['Save_Job ',me.message];
+        Display_Message(Msg,2);
+    end
+    
+end
+if strcmp(opt.Save.Figures,'all')  && ~opt.Go
+    opt.File_pic_khr = sprintf('khr_%s%s_on%i.png',Type,AppendName,opt.OptNum);
+    opt.File_pic_spc = sprintf('spc_%s%s_on%i.png',Type,AppendName,opt.OptNum);
+    opt.File_pic_opt = sprintf('opt_%s%s_on%i.png',Type,AppendName,opt.OptNum);
+    opt.File_pic_sim = sprintf('sim_%s%s_on%i.png',Type,AppendName,opt.OptNum);
+    
+    try
+        Save_Figures(spc,khr,opt,sim);
+    catch me;Msg = ['Save_Job ',me.message];
+        Display_Message(Msg,2);
+    end
+    
+end
+%  Scripts
+if ~isfield(opt,'Folder_scripts')
+    if ~strcmp(opt.Save.Scripts,'none')
+        opt.Folder_scripts = [opt.Save2,opt.TimeStamp,filesep,'scripts',filesep];
+        if ~exist(opt.Folder_scripts,'dir')
+            mkdir(opt.Folder_scripts)
+        end
+        
+    end
+end
+if (strcmp(opt.Save.Scripts,'Main')|| strcmp(opt.Save.Scripts,'Main+blOCh')) && ~opt.Go
+    try
+        Save_Scripts(opt,opt.Save.Scripts);
+    catch me;Msg = ['Save_Job ',me.message];
+        Display_Message(Msg,2);
+    end
+end
+
+
+
+
+
+
+
 end
 
 function Type = My_Type(opt)
-if opt.OptNum == 1
+if opt.OptNum == 1;
     if iscell(opt.Method)
         Type = opt.Method{1};
     else
@@ -2046,25 +2086,6 @@ else
         Type = opt.Method;
     end
 end
-end
-
-function SaveThis = SaveThis(Save)
-
-N = numel(Save);
-% N = numel(num2str(fix(abs(Save))));
-
-% B = num2str(fix(abs(Save)));
-
-SaveThis = zeros(1,N);
-
-for n = 1:N
-    
-    SaveThis(n) = str2double(Save(n));
-    
-    
-end
-
-
 end
 
 function [spc,khr,opt,sim] = Remove_unimportant_stuff(spc,khr,opt,sim)
@@ -2081,7 +2102,9 @@ if isfield(opt,'opt2')
     temp = Remove_unimportant_from_opt(temp);
     opt.opt2 = temp;
 end
-
+if isfield(opt,'fig')
+   opt = rmfield(opt,'fig'); 
+end
 spc = Remove_unimportant_from_spc(spc);
 sim = Remove_unimportant_from_sim(sim);
 khr = Remove_unimportant_from_khr(khr);
@@ -2183,184 +2206,117 @@ end
 
 end
 
-function [spc,khr,opt,sim] = Save_Bundle(spc,khr,opt,sim,SaveThis)
-
+function Save_Bundle(spc,khr,opt,sim,SaveThis)
 
 opt = orderfields(opt); % order fields
-tempdum = opt;					% safe store opt
 
-if SaveThis(1) == 1				% remove unimportant for save
+if strcmp(SaveThis,'reduced')				% remove unimportant for save
     [spc,khr,opt,sim] = Remove_unimportant_stuff(spc,khr,opt,sim);
-end
-
-
-%now save what shall be saved
-if SaveThis(1) > 0
-    % first create folder
-
-    if ~exist(tempdum.Folder_bnd','dir')
-        mkdir(tempdum.Folder_bnd)
+    if ~exist([opt.Folder_bnd,opt.File_bnd],'file')
+    save([opt.Folder_bnd,opt.File_bnd],'spc','khr','opt','sim','-mat','-v7.3')
+    Display_Message(sprintf('Saved: %s',[opt.Folder_bnd,opt.File_bnd]),1);
     end
-    % filename
-    temp2 = [tempdum.Folder_bnd,tempdum.File_bnd];
-
-    save(temp2,'spc','khr','opt','sim','-mat','-v7.3')
-    % message
-    Display_Message(sprintf('Saved: %s',temp2),1);
-    
+end
 end
 
-% restore opt
-opt = tempdum;
-% also pass opt type specific
+function Save_Data(opt,SaveThis)
 
 
-end
-
-function [spc,khr,opt,sim] = Save_Data(spc,khr,opt,sim,SaveThis)
-
-if numel(SaveThis >=2)
-    
-    if opt.Go
-        if SaveThis(2) == 2
+switch SaveThis
+    case 'intermediate'
+        
+        K = size(opt.uo,3);
+        
+        Fun = opt.Fun;
+        Eff = opt.Eff;
+        Pen = opt.Pen;
+        k = opt.k-1; % subtract 1 because where this is called (Eval*_Prog*) Go = 1 and k has added 1 already
+        
+        stat = 1;
+        
+        f = fopen([opt.Folder_dat,opt.File_dat_intermediate],'w');
+        fprintf(f,'%i %e %e %e\n',k,Fun(k),Eff(k),Pen(k));
+        stat = fclose(f);
+        
+        
+        if stat == 0
+            Display_Message(sprintf('Saved: %s',[opt.Folder_dat,opt.File_dat_intermediate]),1);
+        end
+        
+    otherwise
+        
+        if ~exist([opt.Folder_dat,opt.Hdr_dat],'file')
+        if isfield(opt,'opt1')
+            K = size(opt.opt1.uo,3);
             
+            Fun = opt.opt1.Fun;
+            Eff = opt.opt1.Eff;
+            Pen = opt.opt1.Pen;
+        elseif isfield(opt,'opt2')
+            K = size(opt.opt2.uo,3);
+            
+            Fun = opt.opt2.Fun;
+            Eff = opt.opt2.Eff;
+            Pen = opt.opt2.Pen;
+        else
             K = size(opt.uo,3);
             
             Fun = opt.Fun;
             Eff = opt.Eff;
             Pen = opt.Pen;
-            
-            
-            
-            if ~exist(opt.Folder_dat,'dir')
-                mkdir(opt.Folder_dat)
-            end
-            
-            k = opt.k-1; % subtract 1 because where this is called (Eval*_Prog*) Go = 1 and k has added 1 already
-            
-            stat = 1;
-            
-            fh = fopen([opt.Folder_dat,opt.Hdr_dat_intermediate],'w');
-            fprintf(fh,'k\nFun\nEff\nPen');
-            fclose(fh);
-            
-            f = fopen([opt.Folder_dat,opt.File_dat_intermediate],'w');
+        end
+        
+        fh = fopen([opt.Folder_dat,opt.Hdr_dat],'w');
+        fprintf(fh,'k\nFun\nEff\nPen');
+        fclose(fh);
+        
+        
+        f = fopen([opt.Folder_dat,opt.File_dat],'w');
+        for k = 1:K
             fprintf(f,'%i %e %e %e\n',k,Fun(k),Eff(k),Pen(k));
-            stat = fclose(f);
-            
-            
-            if stat == 0
-                Display_Message(sprintf('Saved: %s',[opt.Folder_dat,opt.File_dat_intermediate]),1);
-            end
         end
-    else
+        fclose(f);
         
-        
-        
-        
-        if SaveThis(2) >= 1
-            
-            if ~exist(opt.Folder_dat,'dir')
-                mkdir(opt.Folder_dat)
-            end
-            
-            if isfield(opt,'opt1')
-                K = size(opt.opt1.uo,3);
-                
-                Fun = opt.opt1.Fun;
-                Eff = opt.opt1.Eff;
-                Pen = opt.opt1.Pen;
-            elseif isfield(opt,'opt2')
-                K = size(opt.opt2.uo,3);
-                
-                Fun = opt.opt2.Fun;
-                Eff = opt.opt2.Eff;
-                Pen = opt.opt2.Pen;
-            else
-                K = size(opt.uo,3);
-                
-                Fun = opt.Fun;
-                Eff = opt.Eff;
-                Pen = opt.Pen;
-            end
-
-            fh = fopen([opt.Folder_dat,opt.Hdr_dat],'w');
-            fprintf(fh,'k\nFun\nEff\nPen');
-            fclose(fh);
-            
-            
-            f = fopen([opt.Folder_dat,opt.File_dat],'w');
-            for k = 1:K
-                fprintf(f,'%i %e %e %e\n',k,Fun(k),Eff(k),Pen(k));
-            end
-            fclose(f);
-            
-            Display_Message(sprintf('Saved: %s',[opt.Folder_dat,opt.File_dat]),1);
-            
+        Display_Message(sprintf('Saved: %s',[opt.Folder_dat,opt.File_dat]),1);
         end
-    end
-    
-    
 end
+
 
 end
 
-function [spc,khr,opt,sim] = Save_Controls(spc,khr,opt,sim,SaveThis)
+function Save_Controls(opt,SaveThis)
 
-if numel(SaveThis >=3)
+switch SaveThis
     
-    if opt.Go
-        if SaveThis(3) == 2 || SaveThis(3) == 3 || SaveThis(3) == 4
-            rf = opt.xintermed;
-            
-            if ~exist(opt.Folder_ctrl,'dir')
-                mkdir(opt.Folder_ctrl)
-            end
-            
-            fid = fopen([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate],'w');
-            for nnn = 1:length(rf)
-                fprintf(fid,'%f ',rf);
-                
-            end
-            fclose(fid);
-            
-            if isunix
-                if ismac
-                    zip([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate,'.zip'],[opt.Folder_ctrl,opt.File_ctrl_RF_intermediate])
-                    delete([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate])
-                else
-                    zip([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate,'.zip'],[opt.Folder_ctrl,opt.File_ctrl_RF_intermediate])
-                    delete([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate])
-                end
+    case 'last'
+        if ~exist([opt.Folder_ctrl,opt.File_ctrl_RF_last],'file')
+        if opt.OptNum == 1
+            if isfield(opt,'opt1')
+                rfx = opt.opt1.uo(:,:,end);
+            rfy = opt.opt1.vo(:,:,end);
             else
-                zip([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate,'.zip'],[opt.Folder_ctrl,opt.File_ctrl_RF_intermediate])
-                delete([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate])
+                rfx = opt.uo(:,:,end);
+            rfy = opt.vo(:,:,end);
             end
             
-            Display_Message(sprintf('Saved: %s',[opt.Folder_ctrl,opt.File_ctrl_RF_intermediate,'.zip']),1);
+            
+        elseif opt.OptNum == 2
+            
+            if isfield(opt,'opt2')
+                rfx = opt.opt2.uo(:,:,end);
+            rfy = opt.opt2.vo(:,:,end);
+            else
+                rfx = opt.uo(:,:,end);
+            rfy = opt.vo(:,:,end);
+            end
             
         end
-    else
         
-        if SaveThis(3) == 1 || SaveThis(3) == 3
-            
-            if isfield(opt,'opt1')
-                                rfx = opt.opt1.uo;
-                rfy = opt.opt1.vo;
-            elseif isfield(opt,'opt2')
-                                rfx = opt.opt2.uo;
-                rfy = opt.opt2.vo;
-            else
-                rfx = opt.uo;
-                rfy = opt.vo;
-            end
-
-            [A,B,C] = size(rfx);
+        
+         [A,B,C] = size(rfx);
             
             stat = 1;
-            if ~exist(opt.Folder_ctrl,'dir')
-                mkdir(opt.Folder_ctrl)
-            end
+         
             fid = fopen([opt.Folder_ctrl,opt.File_ctrl_RF_last],'w');
             for b = 1:B
                 
@@ -2386,219 +2342,250 @@ if numel(SaveThis >=3)
                 zip([opt.Folder_ctrl,opt.File_ctrl_RF_last,'.zip'],[opt.Folder_ctrl,opt.File_ctrl_RF_last])
                 delete([opt.Folder_ctrl,opt.File_ctrl_RF_last])
             end
+        
+        end
+    case 'all'
+        if ~exist([opt.Folder_ctrl,opt.File_ctrl_RF_all_zip,'.zip'],'file')
+         if opt.OptNum == 1
+            if isfield(opt,'opt1')
+                rfx = opt.opt1.uo;
+            rfy = opt.opt1.vo;
+            else
+                rfx = opt.uo;
+            rfy = opt.vo;
+            end
             
+            
+        elseif OptNum == 2
+            
+            if isfield(opt,'opt2')
+                rfx = opt.opt2.uo;
+            rfy = opt.opt2.vo;
+            else
+                rfx = opt.uo;
+            rfy = opt.vo;
+            end
+            
+        end
+         
+         [A,B,C] = size(rfx);
+        
+        
+        
+        zipfiles = cell(C,1);
+        for c = 1:C
+            stat = 1;
+            zipfiles{c} = [opt.Folder_ctrl,opt.File_ctrl_RF_all{c}];
+            fid = fopen(zipfiles{c},'w');
+            for b = 1:B
+                
+                for a = 1:A
+                    fprintf(fid,'%f ',rfx(a,b,c));
+                end
+                for a = 1:A
+                    fprintf(fid,'%f ',rfy(a,b,c));
+                end
+                fprintf(fid,'\n ');
+            end
+            stat = fclose(fid);
+            
+            
+            
+        end
+         if isunix
+                if ismac
+                    zip([opt.Folder_ctrl,opt.File_ctrl_RF_all_zip,'.zip'],zipfiles)
+                    for c=1:C
+                    delete([opt.Folder_ctrl,opt.File_ctrl_RF_all{c}])
+                    end
+                else
+                    zip([opt.Folder_ctrl,opt.File_ctrl_RF_all,'.zip'],[opt.Folder_ctrl,opt.File_ctrl_RF_all{c}])
+                    delete([opt.Folder_ctrl,opt.File_ctrl_RF_all{c}])
+                end
+            else
+                zip([opt.Folder_ctrl,opt.File_ctrl_RF_all{c},'.zip'],[opt.Folder_ctrl,opt.File_ctrl_RF_all{c}])
+                delete([opt.Folder_ctrl,opt.File_ctrl_RF_all{c}])
+            end
             
             
             if ~stat
-                Display_Message(sprintf('Saved: %s',[opt.Folder_ctrl,opt.File_ctrl_RF_last,'.zip']),1);
+                Display_Message(sprintf('Saved: %s',[opt.Folder_ctrl,opt.File_ctrl_RF_all{c},'.zip']),1);
             end
-            
-            
+         
+         
+end
+        
+    case 'intermediate'
+        if isfield(opt,'xintermed')
+            rf = opt.xintermed;
+        elseif isfield(opt,'arrayintermed')
+            rf = opt.arrayintermed;
         end
         
-        
-        
-        
-        
-        
-        if SaveThis(3) == 4 || SaveThis(3) == 5
-            if opt.OptNum == 1
-                
-                rfx = opt.opt1.uo(:,:,end);
-                rfy = opt.opt1.vo(:,:,end);
-                
-            elseif OptNum == 2
-                
-                rfx = opt.opt2.uo(:,:,end);
-                rfy = opt.opt2.vo(:,:,end);
+            fid = fopen([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate],'w');
+            for nnn = 1:length(rf)
+                fprintf(fid,'%f\n',rf(nnn));
                 
             end
+            fclose(fid);
             
-            [A,B,C] = size(rfx);
-            
-            
-            if ~exist(opt.Folder_ctrl,'dir')
-                mkdir(opt.Folder_ctrl)
-            end
-            
-            for c = 1:C
-                stat = 1;
-                fid = fopen([opt.Folder_ctrl,opt.File_ctrl_RF_all{c}],'w');
-                for b = 1:B
-                    
-                    for a = 1:A
-                        fprintf(fid,'%f ',rfx(a,b,c));
-                    end
-                    for a = 1:A
-                        fprintf(fid,'%f ',rfy(a,b,c));
-                    end
-                    fprintf(fid,'\n ');
-                end
-                stat = fclose(fid);
-                
-                
-                if isunix
-                    if ismac
-                        zip([opt.Folder_ctrl,opt.File_ctrl_RF_all{c},'.zip'],[opt.Folder_ctrl,opt.File_ctrl_RF_all{c}])
-                        delete([opt.Folder_ctrl,opt.File_ctrl_RF_all{c}])
-                    else
-                        zip([opt.Folder_ctrl,opt.File_ctrl_RF_all,'.zip'],[opt.Folder_ctrl,opt.File_ctrl_RF_all{c}])
-                        delete([opt.Folder_ctrl,opt.File_ctrl_RF_all{c}])
-                    end
+            if isunix
+                if ismac
+                    zip([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate,'.zip'],[opt.Folder_ctrl,opt.File_ctrl_RF_intermediate])
+                    delete([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate])
                 else
-                    zip([opt.Folder_ctrl,opt.File_ctrl_RF_all{c},'.zip'],[opt.Folder_ctrl,opt.File_ctrl_RF_all{c}])
-                    delete([opt.Folder_ctrl,opt.File_ctrl_RF_all{c}])
+                    zip([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate,'.zip'],[opt.Folder_ctrl,opt.File_ctrl_RF_intermediate])
+                    delete([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate])
                 end
-                
-                
-                if ~stat
-                    Display_Message(sprintf('Saved: %s',[opt.Folder_ctrl,opt.File_ctrl_RF_all{c},'.zip']),1);
-                end
+            else
+                zip([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate,'.zip'],[opt.Folder_ctrl,opt.File_ctrl_RF_intermediate])
+                delete([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate])
             end
             
-            
+            Display_Message(sprintf('Saved: %s',[opt.Folder_ctrl,opt.File_ctrl_RF_intermediate,'.zip']),1);
+end
+end
+
+function Save_Figures(spc,khr,opt,sim)
+
+if opt.OptNum == 1
+    if ~isempty(khr) && strcmp(opt.Save.Figures,'all')
+        if isfield(khr,'fig')
+            if ~exist([opt.Folder_pics,opt.File_pic_khr],'file')
+            print(khr.fig,[opt.Folder_pics,opt.File_pic_khr],'-dpng')
+            Display_Message(sprintf('Saved: %s',[opt.Folder_pics,opt.File_pic_khr]),1);
+            end
         end
-        
-        
-        
     end
-    
-    
-    
-    
-    
-    
-end
-
-end
-
-function [spc,khr,opt,sim] = Save_Figures(spc,khr,opt,sim,SaveThis)
-
-
-if numel(SaveThis >=4)
-    if ~exist(opt.Folder_pics,'dir')
-        mkdir(opt.Folder_pics)
+    if ~isempty(spc) && strcmp(opt.Save.Figures,'all')
+        if isfield(spc,'fig')
+            if ~exist([opt.Folder_pics,opt.File_pic_spc],'file')
+            print(spc.fig,[opt.Folder_pics,opt.File_pic_spc],'-dpng')
+            Display_Message(sprintf('Saved: %s',[opt.Folder_pics,opt.File_pic_spc]),1);
+            end
+        end
     end
-    if SaveThis(4)
-        if ~opt.Go
-        if opt.OptNum == 1
-            
-            if isfield(khr,'fig')
-                print(khr.fig,[opt.Folder_pics,opt.File_pic_khr],'-dpng')
-                Display_Message(sprintf('Saved: %s',[opt.Folder_pics,opt.File_pic_khr]),1);
-            end
-            if isfield(spc,'fig')
-                print(spc.fig,[opt.Folder_pics,opt.File_pic_spc],'-dpng')
-                Display_Message(sprintf('Saved: %s',[opt.Folder_pics,opt.File_pic_spc]),1);
-            end
-            
-            if isfield(opt,'fig')
-                print(opt.fig,[opt.Folder_pics,opt.File_pic_opt],'-dpng')
+    if ~isempty(opt) && (strcmp(opt.Save.Figures,'all') || strcmp(opt.Save.Figures,'opt'))
+        if isfield(opt,'opt1')
+            if isfield(opt.opt1,'fig')
+                if ~exist([opt.Folder_pics,opt.File_pic_opt],'file')
+                print(opt.opt1.fig,[opt.Folder_pics,opt.File_pic_opt],'-dpng')
                 Display_Message(sprintf('Saved: %s',[opt.Folder_pics,opt.File_pic_opt]),1);
+                end
             end
-            
         else
-            
             if isfield(opt,'fig')
+                if ~exist([opt.Folder_pics,opt.File_pic_opt],'file')
                 print(opt.fig,[opt.Folder_pics,opt.File_pic_opt],'-dpng')
                 Display_Message(sprintf('Saved: %s',[opt.Folder_pics,opt.File_pic_opt]),1);
-            end
-            
-        end
-        if ~isempty(sim)
-            
-            if isfield(sim,'fig')
-                print(sim.fig,[opt.Folder_pics,opt.File_pic_sim],'-dpng')
-                Display_Message(sprintf('Saved: %s',[opt.Folder_pics,opt.File_pic_sim]),1);
+                end
             end
         end
+    end
+else
+    if ~isempty(opt) && (strcmp(opt.Save.Figures,'all') || strcmp(opt.Save.Figures,'opt'))
+        if isfield(opt,'opt2')
+            if isfield(opt.opt2,'fig')
+                if ~exist([opt.Folder_pics,opt.File_pic_opt],'file')
+                print(opt.opt2.fig,[opt.Folder_pics,opt.File_pic_opt],'-dpng')
+                Display_Message(sprintf('Saved: %s',[opt.Folder_pics,opt.File_pic_opt]),1);
+                end
+            end
+        else
+            if isfield(opt,'fig')
+                if ~exist([opt.Folder_pics,opt.File_pic_opt],'file')
+                print(opt.fig,[opt.Folder_pics,opt.File_pic_opt],'-dpng')
+                Display_Message(sprintf('Saved: %s',[opt.Folder_pics,opt.File_pic_opt]),1);
+                end
+            end
+        end
+    end
+end
+if ~isempty(sim) && strcmp(opt.Save.Figures,'all')
+    
+    if isfield(sim,'fig')
+        print(sim.fig,[opt.Folder_pics,opt.File_pic_sim],'-dpng')
+        Display_Message(sprintf('Saved: %s',[opt.Folder_pics,opt.File_pic_sim]),1);
+    end
+end
+
+
+
+
+end
+
+function Save_Scripts(opt,SaveThis)
+
+
+% BUG: Perhaps Caller should be more that dbstack to 2nd level...
+switch SaveThis
+    case 'Main'
+        if opt.OptNum == 1
+            
+            temp = strsplit(opt.Caller,'/');
+            
+            if strcmp(temp{end},'parallel_function.m')
+                
+            else
+                if ~exist([opt.Folder_scripts,'/',temp{end},'.run'],'file')
+                copyfile(opt.Caller,[opt.Folder_scripts,'/',temp{end},'.run'])
+                Display_Message(sprintf('Saved main file to %s',opt.Folder_scripts),1);
+                end
+            end
+            
         end
         
-    end
-end
-
-end
-
-
-function [spc,khr,opt,sim] = Save_Scripts(spc,khr,opt,sim,SaveThis)
-
-
-if numel(SaveThis) >=6
-    if SaveThis(6) > 0
-        % BUG: Perhaps Caller should be more that dbstack to 2nd level...
-        if ~exist(opt.Folder_scripts,'dir')
-            mkdir(opt.Folder_scripts)
-        end
-        if opt.OptNum == 1
-            if SaveThis(6) == 1
-                
-                temp = strsplit(opt.Caller,'/');
-                
-                if strcmp(temp{end},'parallel_function.m')
-                    
-                else
-                    copyfile(opt.Caller,[opt.Folder_scripts,'/',temp{end},'.run'])
-                    Display_Message(sprintf('Saved main file to %s',opt.Folder_scripts),1);
-                    
+        
+        
+        
+        
+    case {'Main+blOCh'}
+        
+        
+        
+        Path = strrep(mfilename('fullpath'),mfilename,'');
+        
+        % 			  copyfile(Path,opt.Folder_scripts)
+        
+        temp = strsplit(opt.Caller,'/');
+        
+        
+        Do = 0;
+        try
+            if strcmp(temp{end},'parallel_function.m')
+                Display_Message(sprintf('BUG: when running parallel job, blOCh is not able to save the main file...yet'),1);
+            else
+                if ~exist([opt.Folder_scripts,'/',temp{end},'.run'],'file')
+                    Do = 1;
+                copyfile(opt.Caller,[opt.Folder_scripts,'/',temp{end},'.run'])
+                Display_Message(sprintf('Saved main file to %s',opt.Folder_scripts),1);
                 end
-                
-                
-                
-                
-                
-                
-                
-            elseif SaveThis(6) == 2
-                
-                
-                
-                Path = strrep(mfilename('fullpath'),mfilename,'');
-                
-                % 			  copyfile(Path,opt.Folder_scripts)
-                
-                temp = strsplit(opt.Caller,'/');
-                
-                
-                
-                try
-                    if strcmp(temp{end},'parallel_function.m')
-                        Display_Message(sprintf('BUG: when running parallel job, blOCh is not able to save the main file...yet'),1);
-                    else
-                        copyfile(opt.Caller,[opt.Folder_scripts,'/',temp{end},'.run'])
-                        Display_Message(sprintf('Saved main file to %s',opt.Folder_scripts),1);
-                        
-                    end
-                catch me;
-                    Display_Message(sprintf(['Was not abve to save main file ',me.message]),1);
-                end
-                
-                try
-                    if isunix
-                        if ismac
-                            zip([opt.Folder_scripts,'/scripts'],Path)
-                        else
-                            zip([opt.Folder_scripts,'/scripts'],Path)
-                        end
-                    else
-                        zip([opt.Folder_scripts,'\scripts'],Path)
-                    end
-                    Display_Message(sprintf('Saved all blOCh-scripts to %s',opt.Folder_scripts),1);
-                    
-                catch me;
-                    Display_Message(sprintf(['Was not able to save and zip scripts: ',me.message]),1);
-                    
-                end
-                
-                
-                
-                
-                
-                
-                
             end
+        catch me
+            Display_Message(sprintf(['Was not able to save main file ',me.message]),1);
         end
-    end
+        if Do
+        try
+            if isunix
+                if ismac
+                    zip([opt.Folder_scripts,'/scripts'],Path)
+                else
+                    zip([opt.Folder_scripts,'/scripts'],Path)
+                end
+            else
+                zip([opt.Folder_scripts,'\scripts'],Path)
+            end
+            Display_Message(sprintf('Saved all blOCh-scripts to %s',opt.Folder_scripts),1);
+            
+        catch me
+            Display_Message(sprintf(['Was not able to save and zip scripts: ',me.message]),1);
+            
+        end
+        end
 end
+
+
+
 end
 %% GRAPE_Khaneja
 
@@ -2855,15 +2842,12 @@ end
 if mod(opt.k,opt.ksaveintermediate) == 0
     
     
+    opt.xintermed = Rearrange_controls(opt.u,opt.v);
     tempsave = opt.Save; % take backup
-    %
-    opt.Save = '000000'; % reset
-    opt.Save(2) = tempsave(2); % get initial intention back for data saving
-    opt.Save(3) = tempsave(3); % get initial intention back for controls saving
-    % thus, if intermediate saving of data and controls were intended it
-    % will be saved. But other (bundle, pics, scripts etc.) will not, at
-    % least not before the end if intended.
-    try opt = Save_Job(spc,khr,opt);
+    opt.Save = struct('Bundle','none','Data',tempsave.Data,'Controls',tempsave.Controls,'Figures','none','Scripts','none');
+    
+    try 
+        opt = Save_Job([],[],opt);
     catch me; Display_Message(['Progress_GRAPE_Khaneja: Save_Job ',me.message],2); end
     
     opt.Save = tempsave;
@@ -2895,7 +2879,6 @@ function opt = MC_MadayTurinici(spc,khr,opt)
 %   Turinici.
 
 
-tic_Opt_Wall_Clock_Time = tic;
 
 tic_One_Iteration = tic;
 opt = Allocate_Variables(spc,khr,opt);
@@ -2908,6 +2891,11 @@ opt.M_T = opt.M_t(:,end);
 
 Eff = Efficiency_GRAPE_Khaneja(spc,opt);
 
+Par.lambda = 2e-6;
+Par.delta = 0.125;
+Par.eta = 0.125;
+Par.Grad = '1st';
+opt.Par = blOCh__khr('Get_NewPar',[],[],[],opt.Par,Par);
 
 Pen = opt.Par.lambda*sum((opt.u(:)).^2+(opt.v(:)).^2)*opt.dt;
 Fun  = Eff-Pen;
@@ -3158,15 +3146,12 @@ end
 if mod(opt.k,opt.ksaveintermediate) == 0
     
     
+    opt.xintermed = Rearrange_controls(opt.u,opt.v);
     tempsave = opt.Save; % take backup
-    %
-    opt.Save = '000000'; % reset
-    opt.Save(2) = tempsave(2); % get initial intention back for data saving
-    opt.Save(3) = tempsave(3); % get initial intention back for controls saving
-    % thus, if intermediate saving of data and controls were intended it
-    % will be saved. But other (bundle, pics, scripts etc.) will not, at
-    % least not before the end if intended.
-    try opt = Save_Job(spc,khr,opt);
+    opt.Save = struct('Bundle','none','Data',tempsave.Data,'Controls',tempsave.Controls,'Figures','none','Scripts','none');
+    
+    try 
+        opt = Save_Job([],[],opt);
     catch me; Display_Message(['Progress_MC_MadayTurinici: Save_Job ',me.message],2); end
     
     opt.Save = tempsave;
@@ -3335,7 +3320,7 @@ opt.vo(:,:,opt.ksafe+1:end) = [];
 opt.Durations(opt.ksafe+1:end) = [];
 clearvars -global history
 opt.Opt_Wall_Clock_Time = toc(tic_Opt_Wall_Clock_Time);
-opt.Go = opt2.Go;
+opt.Go = false;
 end
 
 function [J,Grad] = Iteration_QN_LBFGS(x,spc,khr,opt)
@@ -4030,15 +4015,12 @@ end
 if mod(opt.k,opt.ksaveintermediate) == 0
     
     
+    opt.xintermed = Rearrange_controls(opt.u,opt.v);
     tempsave = opt.Save; % take backup
-    %
-    opt.Save = '000000'; % reset
-    opt.Save(2) = tempsave(2); % get initial intention back for data saving
-    opt.Save(3) = tempsave(3); % get initial intention back for controls saving
-    % thus, if intermediate saving of data and controls were intended it
-    % will be saved. But other (bundle, pics, scripts etc.) will not, at
-    % least not before the end if intended.
-    try opt = Save_Job(spc,khr,opt);
+    opt.Save = struct('Bundle','none','Data',tempsave.Data,'Controls',tempsave.Controls,'Figures','none','Scripts','none');
+
+    try 
+        opt = Save_Job([],[],opt);
     catch me; Display_Message(['Progress_QN_LBFGS: Save_Job: ',me.message],2); end
     
     opt.Save = tempsave;
