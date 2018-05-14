@@ -2174,7 +2174,7 @@ switch get(hsim.popupmenu_Pulse,'Value')
         hsim.axp.Dim1ticklabel = linspace(1,hsim.sim.N,5);
         hsim.axp.Dim2ticklabel = linspace(0,Mx,3);
         hsim.axp.Dim1axis = linspace(1,hsim.sim.N,5);
-        hsim.axp.Dim2axis = linspace(1,Mx,3);
+        hsim.axp.Dim2axis = linspace(0,Mx,3);
         
         hsim.axp.Dim1label = ' Time frame [#]';
         
@@ -2199,7 +2199,7 @@ switch get(hsim.popupmenu_Pulse,'Value')
             end
             
         else
-            hsim.axp.ordinate = abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+            hsim.axp.ordinate = angle(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
         end
         
         
@@ -2244,7 +2244,7 @@ switch get(hsim.popupmenu_Pulse,'Value')
             end
             
         else
-            hsim.axp.ordinate = abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+            hsim.axp.ordinate = real(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
         end
         
         switch hsim.popupmenu_PulseUnitsselect
@@ -2289,7 +2289,7 @@ switch get(hsim.popupmenu_Pulse,'Value')
             end
             
         else
-            hsim.axp.ordinate = abs(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
+            hsim.axp.ordinate = imag(complex(hsim.sim.uo(:,:,hsim.kpNo),hsim.sim.vo(:,:,hsim.kpNo))).';
         end
         
         switch hsim.popupmenu_PulseUnitsselect
