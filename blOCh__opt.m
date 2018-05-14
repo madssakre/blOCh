@@ -777,11 +777,11 @@ switch extension
         
     case {'txt','.txt'}
         
-        old = load(Init,'-ascii');
+        old = load(I1,'-ascii');
         
         [A,B] = size(old);
         
-        if B/2 ~= spc.pTx
+        if B/2 ~= pTx
             Msg = sprintf('For the chosen pTx, Init:\n\t%s\ndoesn''t contain enough columns (u(s=1),...,u(s=pTx),v(s=1),...,v(s=pTx))',Init);
         else
             temp1 = old(:,1:B/2);
@@ -1907,24 +1907,7 @@ Type = My_Type(opt);
 
 
 
-% About bundles
-if ~isfield(opt,'Folder_bnd')
-    if ~strcmp(opt.Save.Bundle,'none')
-        opt.Folder_bnd = [opt.Save2,opt.TimeStamp,filesep,'bundles',filesep];
-        if ~exist(opt.Folder_bnd,'dir')
-            mkdir(opt.Folder_bnd)
-        end
-    end
-end
-if strcmp(opt.Save.Bundle,'reduced') && ~opt.Go
-    
-    opt.File_bnd = sprintf('%s%s_on%i.bnd',Type,AppendName,opt.OptNum);
-    try
-        Save_Bundle(spc,khr,opt,sim,'reduced');
-    catch me;Msg = ['Save_Job ',me.message];
-        Display_Message(Msg,2);
-    end
-end
+
 
 % about Data
 if ~isfield(opt,'Folder_dat')
@@ -2065,7 +2048,24 @@ if (strcmp(opt.Save.Scripts,'Main')|| strcmp(opt.Save.Scripts,'Main+blOCh')) && 
 end
 
 
-
+% About bundles
+if ~isfield(opt,'Folder_bnd')
+    if ~strcmp(opt.Save.Bundle,'none')
+        opt.Folder_bnd = [opt.Save2,opt.TimeStamp,filesep,'bundles',filesep];
+        if ~exist(opt.Folder_bnd,'dir')
+            mkdir(opt.Folder_bnd)
+        end
+    end
+end
+if strcmp(opt.Save.Bundle,'reduced') && ~opt.Go
+    
+    opt.File_bnd = sprintf('%s%s_on%i.bnd',Type,AppendName,opt.OptNum);
+    try
+        Save_Bundle(spc,khr,opt,sim,'reduced');
+    catch me;Msg = ['Save_Job ',me.message];
+        Display_Message(Msg,2);
+    end
+end
 
 
 
@@ -2342,7 +2342,9 @@ switch SaveThis
                 zip([opt.Folder_ctrl,opt.File_ctrl_RF_last,'.zip'],[opt.Folder_ctrl,opt.File_ctrl_RF_last])
                 delete([opt.Folder_ctrl,opt.File_ctrl_RF_last])
             end
-        
+        if ~stat
+                Display_Message(sprintf('Saved: %s.zip',[opt.Folder_ctrl,opt.File_ctrl_RF_last]),1);
+            end
         end
     case 'all'
         if ~exist([opt.Folder_ctrl,opt.File_ctrl_RF_all_zip,'.zip'],'file')
@@ -2409,7 +2411,7 @@ switch SaveThis
             
             
             if ~stat
-                Display_Message(sprintf('Saved: %s',[opt.Folder_ctrl,opt.File_ctrl_RF_all{c},'.zip']),1);
+                Display_Message(sprintf('Saved: %s.zip',[opt.Folder_ctrl,opt.File_ctrl_RF_all{c}]),1);
             end
          
          
@@ -2442,7 +2444,7 @@ end
                 delete([opt.Folder_ctrl,opt.File_ctrl_RF_intermediate])
             end
             
-            Display_Message(sprintf('Saved: %s',[opt.Folder_ctrl,opt.File_ctrl_RF_intermediate,'.zip']),1);
+            Display_Message(sprintf('Saved: %s.zip',[opt.Folder_ctrl,opt.File_ctrl_RF_intermediate]),1);
 end
 end
 
