@@ -169,7 +169,11 @@ if isempty(Fun)
             if strcmp(sim.opt_n,'opt1')
                 sim.uo = opt.opt1.uo;
                 sim.vo = opt.opt1.vo;
+                if ~isfield(opt.opt1,'ksafe')
+                    Kact = 1;
+                else
                 Kact = opt.opt1.ksafe;
+                end
                 sim.MaxIter = opt.opt1.MaxIter;
                 sim.mon = opt.opt1.mon;
                 sim.g = opt.opt1.g;
@@ -178,7 +182,11 @@ if isempty(Fun)
             elseif strcmp(sim.opt_n,'opt2')
                 sim.uo = opt.opt2.uo;
                 sim.vo = opt.opt2.vo;
+                if ~isfield(opt.opt2,'ksafe')
+                    Kact = 1;
+                else
                 Kact = opt.opt2.ksafe;
+                end
                 sim.MaxIter = opt.opt2.MaxIter;
                 sim.mon = opt.opt2.mon;
                 sim.g = opt.opt2.g;
@@ -196,7 +204,7 @@ if isempty(Fun)
                 Display_Message(sprintf('blOCh__sim: both khr and g were specified. g will be ignored'),1);
             end
             if isdef(varargin,'u') && isdef(varargin,'v')
-                Display_Message(sprintf('blOCh__sim: both u and v were specified. '),1);
+%                 Display_Message(sprintf('blOCh__sim: both u and v were specified. '),1);
             elseif isdef(varargin,'u') && ~isdef(varargin,'v')
                 Display_Message(sprintf('blOCh__sim: only u was specified. Aborting '),2);
                 return
@@ -237,7 +245,7 @@ if isempty(Fun)
                 return
             end
             if isdef(varargin,'u') && isdef(varargin,'v')
-                Display_Message(sprintf('blOCh__sim: both u and v were specified. '),1);
+%                 Display_Message(sprintf('blOCh__sim: both u and v were specified. '),1);
             elseif isdef(varargin,'u') && ~isdef(varargin,'v')
                 Display_Message(sprintf('blOCh__sim: only u was specified. Aborting '),2);
                 return
