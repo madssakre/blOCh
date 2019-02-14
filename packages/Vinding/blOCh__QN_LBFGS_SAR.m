@@ -102,7 +102,7 @@ x0(isnan(x0)) = 0;
 
 opt.maxRF = opt.w1m;
 
-if strcmp(Par.Constr.RFpeak.Cope,'Ignore')
+if strcmp(opt.Par.Constr.RFpeak.Cope,'Ignore')
     xlimRF = ones(1,opt.N*spc.pTx*2)*Inf;
 else
     if strcmp(opt.Par.Constr.RFpeak.Type,'bnd')
