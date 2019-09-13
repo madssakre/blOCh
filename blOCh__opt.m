@@ -938,14 +938,29 @@ if opt.OptNum >= 1
     opt.Gm = khr.GmHW*khr.Gmpct/100;
     opt.Sm = khr.SmHW*khr.Smpct/100;
     
-    opt.M_t = zeros(3*spc.P,opt.N+1);
+    
+    if isfield(opt,'mem') % the user can avoid a memory problem with huge arrays by specifying 'opt.mem = 'low''. Then only the start and final conditions in M_t and L_t, respectively, will be output.
+        if strcmp(opt.mem,'low')
+            opt.M_t = spc.M0;
+            opt.L_t = spc.Md;
+        else
+            opt.M_t = zeros(3*spc.P,opt.N+1);
+            opt.M_t(:,1:opt.mon(1)) = repmat(spc.M0,1,opt.mon(1));
+            opt.L_t = zeros(3*spc.P,opt.N+1);
+            opt.L_t(:,end-opt.mon(end)+1:end) = repmat(spc.Md,1,opt.mon(end));
+        end
+    else
+        opt.M_t = zeros(3*spc.P,opt.N+1);
+            opt.M_t(:,1:opt.mon(1)) = repmat(spc.M0,1,opt.mon(1));
+            opt.L_t = zeros(3*spc.P,opt.N+1);
+            opt.L_t(:,end-opt.mon(end)+1:end) = repmat(spc.Md,1,opt.mon(end));
+    end
     
     
     
     
-    opt.M_t(:,1:opt.mon(1)) = repmat(spc.M0,1,opt.mon(1));
-    opt.L_t = zeros(3*spc.P,opt.N+1);
-    opt.L_t(:,end-opt.mon(end)+1:end) = repmat(spc.Md,1,opt.mon(end));
+    
+    
     
     
     
