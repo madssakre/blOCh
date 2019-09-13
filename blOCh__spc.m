@@ -2075,7 +2075,7 @@ if ~strcmpi(MPS,'')
                                             B1_ref_voltage = 1;
                                         end
                                     case 'absolute_valued'
-                                        
+                                        B1_ref_voltage = 1;
                                 end
                                 
                                 
