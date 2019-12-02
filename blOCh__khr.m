@@ -391,6 +391,7 @@ if isempty(Fun)
             khr.RFmHW = temp.RFmHW;
             khr.Sys = temp.Sys;
             
+            khr.Par = temp.Par;
             
             khr.Dim = spc.Dim;
             if khr.MaskOnly
