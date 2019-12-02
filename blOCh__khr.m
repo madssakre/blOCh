@@ -1637,13 +1637,20 @@ function nP = Get_NewPar(uP,dP)
 if isempty(uP)
     nP = dP;
 else
-    dPnames = recursivefieldnames(dP);
-    uPnames = recursivefieldnames(uP);
+    dPnames = b6_recursivefieldnames(dP);
+    uPnames = b6_recursivefieldnames(uP);
     nP = struct;
+    
+    % first find the user parameters amongst parameters with default
+    % parameters and write those into the new parameters struct.
+    % those default parameters that are not user specified will be adopted
+    % to the new parameters as well
+    
     N = length(dPnames);
     for n = 1:N
         curName = dPnames{n};
-        test = find(strcmp(curName,uPnames));
+        test = find(strcmp(curName,uPnames), 1);
+%         test = find(strcmp(curName,uPnames));
         if isempty(test)
             eval(['nP.',curName,'=dP.',curName,';'])
         else
@@ -1651,8 +1658,21 @@ else
         end
         
     end
+    
+    % secondly, keep those user parameters that do not have a default
+    % parameter in this function call, and adopt them to the new parameter
+    % struct too.
+    N = length(uPnames);
+    
+    for n = 1:N
+        curName = uPnames{n};
+        test = find(strcmp(curName,dPnames), 1);
+        if isempty(test)
+            eval(['nP.',curName,'=uP.',curName,';'])
+        end
+        
+    end
 end
-
 end
 
 function O = recursivefieldnames(I)
